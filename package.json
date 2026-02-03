@@ -1,0 +1,45 @@
+{
+  "name": "jsonflow-distributed",
+  "version": "1.0.0",
+  "description": "JSONFlow Phase 4: Distributed Execution with Quantum, WASM, and Advanced Orchestration",
+  "main": "distributed-engine.js",
+  "scripts": {
+    "start": "node distributed-node.js",
+    "examples": "node phase4-examples.js",
+    "test": "node phase4-tests.js",
+    "coordinator": "node distributed-node.js --role coordinator --port 8080",
+    "worker": "node distributed-node.js --role worker --port 8081 --connect ws://localhost:8080"
+  },
+  "keywords": [
+    "workflow",
+    "orchestration",
+    "distributed",
+    "quantum",
+    "wasm",
+    "blockchain",
+    "deterministic",
+    "receipts"
+  ],
+  "author": "JSONFlow Team",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.14.0",
+    "pg": "^8.11.0",
+    "amqplib": "^0.10.3",
+    "kafkajs": "^2.2.4"
+  },
+  "optionalDependencies": {
+    "@qiskit/sdk": "^1.0.0",
+    "wasmer": "^0.12.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.50.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/jsonflow-engine.git"
+  }
+}

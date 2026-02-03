@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sovereign Systems Demo Landing</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1e1e1e;
+      color: #ffffff;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Fixed Navigation Bar */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #111;
+      border-bottom: 1px solid #333;
+      z-index: 1000;
+      padding: 12px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    .nav-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px 20px;
+    }
+
+    .nav-list a {
+      color: #e0e0e0;
+      text-decoration: none;
+      padding: 10px 16px;
+      font-size: 1rem;
+      border-radius: 6px;
+      background-color: #2a2a2a;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .nav-list a:hover,
+    .nav-list a:focus {
+      background-color: #4CAF50;
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .nav-list a.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    /* Main content spacing to avoid overlap with fixed nav */
+    main {
+      margin-top: 90px;
+      margin-bottom: 40px;
+      max-width: 900px;
+      width: 90%;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.8rem;
+      margin: 0.4em 0;
+      color: #4CAF50;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      color: #aaa;
+      margin: 0.5em 0 2em;
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto 60px;
+    }
+
+    .big-nav-button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 18px 28px;
+      font-size: 1.15rem;
+      text-align: center;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-decoration: none;
+      display: block;
+    }
+
+    .big-nav-button:hover {
+      background-color: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(76,175,80,0.3);
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 40px 20px 60px;
+      font-size: 0.95rem;
+      color: #888;
+      text-align: center;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      .nav-list {
+        gap: 10px 14px;
+      }
+      .nav-list a {
+        padding: 8px 14px;
+        font-size: 0.95rem;
+      }
+      main {
+        margin-top: 110px;
+      }
+      header h1 {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fixed Navigation Bar -->
+  <nav>
+    <ul class="nav-list">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="browser-demo.html">Browser Demo</a></li>
+      <li><a href="schema.html">Schema Viewer</a></li>
+      <li><a href="sovereign-search-engine.html">Search Engine</a></li>
+      <li><a href="sovereign-social.html">Sovereign Social</a></li>
+      <li><a href="workflow-visualizer.html">Workflow Visualizer</a></li>
+      <li><a href="address-uri/index.html">Address URI</a></li>
+      <li><a href="unibox-app/index.html">Unified Comm</a></li>
+      <li><a href="value/money.html">Money Value</a></li>
+      <li><a href="value/test-modules.html">Test Modules</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <header>
+      <h1>Sovereign Systems Demos</h1>
+      <p>Choose a module to explore — browser-native experiences</p>
+    </header>
+
+    <div class="button-container">
+      <a class="big-nav-button" href="browser-demo.html">Browser Demo</a>
+      <a class="big-nav-button" href="schema.html">Schema Viewer</a>
+      <a class="big-nav-button" href="sovereign-search-engine.html">Sovereign Search Engine</a>
+      <a class="big-nav-button" href="sovereign-social.html">Sovereign Social</a>
+      <a class="big-nav-button" href="workflow-visualizer.html">Workflow Visualizer</a>
+      <a class="big-nav-button" href="address-uri/index.html">Address URI Tool</a>
+      <a class="big-nav-button" href="unibox-app/index.html">Unified Communication</a>
+      <a class="big-nav-button" href="value/money.html">Value — Money</a>
+      <a class="big-nav-button" href="value/test-modules.html">Test Modules</a>
+    </div>
+  </main>
+
+  <footer>
+    © 2026 Sovereign Systems | All demos run natively in the browser
+  </footer>
+
+  <script>
+    // Highlight active nav item based on current page
+    document.addEventListener('DOMContentLoaded', function() {
+      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+      const navLinks = document.querySelectorAll('.nav-list a');
+      
+      navLinks.forEach(link => {
+        const linkPage = link.getAttribute('href').split('/').pop();
+        if (linkPage === currentPage) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
