@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Search Engine</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0e17;
+            --bg-card: #161b26;
+            --bg-input: #1f2937;
+            --accent-cyan: #06ffd5;
+            --accent-magenta: #ff06dc;
+            --accent-orange: #ff8c42;
+            --text-primary: #e8f4ff;
+            --text-secondary: #94a3b8;
+            --border: #2d3748;
+            --shadow: rgba(6, 255, 213, 0.1);
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(6, 255, 213, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 6, 220, 0.03) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            border-bottom: 2px solid var(--border);
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .search-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px var(--shadow);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(6, 255, 213, 0.1);
+        }
+
+        button {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            border: none;
+            border-radius: 8px;
+            color: var(--bg-dark);
+            font-weight: 700;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(6, 255, 213, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        select, input[type="range"] {
+            padding: 0.75rem;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        input[type="range"] {
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .range-value {
+            text-align: center;
+            color: var(--accent-magenta);
+            font-weight: 700;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .sidebar h3 {
+            font-family: 'Syne', sans-serif;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+        }
+
+        .identity-card {
+            background: var(--bg-input);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .identity-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateX(4px);
+        }
+
+        .identity-card.active {
+            border-color: var(--accent-magenta);
+            background: rgba(255, 6, 220, 0.1);
+        }
+
+        .identity-address {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            word-break: break-all;
+        }
+
+        .namespace-tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .namespace-tab {
+            padding: 0.5rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .namespace-tab:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .namespace-tab.active {
+            background: var(--accent-cyan);
+            color: var(--bg-dark);
+            border-color: var(--accent-cyan);
+        }
+
+        .results-container {
+            min-height: 400px;
+        }
+
+        .result-item {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-item:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 8px 32px var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .result-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .result-content {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .result-scores {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .score-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-input);
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .score-label {
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.7rem;
+        }
+
+        .score-value {
+            font-weight: 700;
+        }
+
+        .score-value.high {
+            color: var(--accent-cyan);
+        }
+
+        .score-value.medium {
+            color: var(--accent-orange);
+        }
+
+        .score-value.low {
+            color: var(--text-secondary);
+        }
+
+        .stats-bar {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 2rem;
+            opacity: 0.3;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--accent-cyan);
+            font-size: 1.2rem;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        @media (max-width: 968px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sovereign Search</h1>
+            <p class="subtitle">Identity-First Hybrid Search Engine</p>
+        </header>
+
+        <div class="search-section">
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Enter identity address or natural language query..."
+                    autocomplete="off"
+                />
+                <button onclick="performSearch()">Search</button>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label for="fusionAlpha">Fusion Alpha</label>
+                    <input 
+                        type="range" 
+                        id="fusionAlpha" 
+                        min="0" 
+                        max="100" 
+                        value="50"
+                        oninput="updateRangeValue('fusionAlpha')"
+                    />
+                    <div class="range-value" id="fusionAlphaValue">0.50</div>
+                </div>
+
+                <div class="control-group">
+                    <label for="maxResults">Max Results</label>
+                    <select id="maxResults">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="searchMode">Search Mode</label>
+                    <select id="searchMode">
+                        <option value="hybrid" selected>Hybrid (Dense + Sparse)</option>
+                        <option value="dense">Dense Only (Semantic)</option>
+                        <option value="sparse">Sparse Only (BM25)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="statsBar"></div>
+
+        <div class="results-grid">
+            <aside class="sidebar">
+                <h3>Identities</h3>
+                <div id="identitiesList"></div>
+                
+                <h3 style="margin-top: 2rem;">Namespaces</h3>
+                <div class="namespace-tabs" id="namespaceTabs"></div>
+            </aside>
+
+            <main class="results-container" id="resultsContainer">
+                <div class="empty-state">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <p>Enter a search query to begin exploring</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // REAL BM25 IMPLEMENTATION
+        // ============================================================================
+        
+        class BM25 {
+            constructor(k1 = 1.5, b = 0.75) {
+                this.k1 = k1;
+                this.b = b;
+                this.documents = [];
+                this.docCount = 0;
+                this.avgDocLength = 0;
+                this.docLengths = [];
+                this.idf = new Map();
+                this.termFreqs = [];
+            }
+
+            addDocument(doc) {
+                const tokens = this.tokenize(doc.text);
+                this.documents.push(doc);
+                this.docLengths.push(tokens.length);
+                
+                const termFreq = new Map();
+                tokens.forEach(token => {
+                    termFreq.set(token, (termFreq.get(token) || 0) + 1);
+                });
+                this.termFreqs.push(termFreq);
+                
+                this.docCount++;
+            }
+
+            build() {
+                this.avgDocLength = this.docLengths.reduce((a, b) => a + b, 0) / this.docCount;
+                
+                // Calculate IDF for each term
+                const docFreq = new Map();
+                this.termFreqs.forEach(termFreq => {
+                    termFreq.forEach((freq, term) => {
+                        docFreq.set(term, (docFreq.get(term) || 0) + 1);
+                    });
+                });
+
+                docFreq.forEach((df, term) => {
+                    this.idf.set(term, Math.log((this.docCount - df + 0.5) / (df + 0.5) + 1));
+                });
+            }
+
+            search(query, topK = 10) {
+                const queryTokens = this.tokenize(query);
+                const scores = [];
+
+                for (let i = 0; i < this.docCount; i++) {
+                    let score = 0;
+                    const docLength = this.docLengths[i];
+                    const termFreq = this.termFreqs[i];
+
+                    queryTokens.forEach(token => {
+                        const tf = termFreq.get(token) || 0;
+                        const idf = this.idf.get(token) || 0;
+                        
+                        const numerator = tf * (this.k1 + 1);
+                        const denominator = tf + this.k1 * (1 - this.b + this.b * (docLength / this.avgDocLength));
+                        
+                        score += idf * (numerator / denominator);
+                    });
+
+                    scores.push({ doc: this.documents[i], score });
+                }
+
+                return scores
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, topK);
+            }
+
+            tokenize(text) {
+                return text
+                    .toLowerCase()
+                    .replace(/[^\w\s]/g, ' ')
+                    .split(/\s+/)
+                    .filter(token => token.length > 2);
+            }
+        }
+
+        // ============================================================================
+        // REAL TF-IDF VECTORIZER FOR DENSE EMBEDDINGS
+        // ============================================================================
+        
+        class TfidfVectorizer {
+            constructor() {
+                this.vocabulary = new Map();
+                this.idf = new Map();
+                this.documents = [];
+            }
+
+            fit(documents) {
+                this.documents = documents;
+                const docCount = documents.length;
+                
+                // Build vocabulary
+                documents.forEach((doc, idx) => {
+                    const tokens = this.tokenize(doc);
+                    const uniqueTokens = new Set(tokens);
+                    
+                    uniqueTokens.forEach(token => {
+                        if (!this.vocabulary.has(token)) {
+                            this.vocabulary.set(token, this.vocabulary.size);
+                        }
+                    });
+                });
+
+                // Calculate IDF
+                this.vocabulary.forEach((idx, term) => {
+                    let docFreq = 0;
+                    documents.forEach(doc => {
+                        if (this.tokenize(doc).includes(term)) {
+                            docFreq++;
+                        }
+                    });
+                    this.idf.set(term, Math.log(docCount / (docFreq + 1)) + 1);
+                });
+            }
+
+            transform(text) {
+                const vector = new Array(this.vocabulary.size).fill(0);
+                const tokens = this.tokenize(text);
+                
+                // Calculate term frequency
+                const termFreq = new Map();
+                tokens.forEach(token => {
+                    termFreq.set(token, (termFreq.get(token) || 0) + 1);
+                });
+
+                // Calculate TF-IDF
+                termFreq.forEach((freq, term) => {
+                    if (this.vocabulary.has(term)) {
+                        const idx = this.vocabulary.get(term);
+                        const tf = freq / tokens.length;
+                        const idf = this.idf.get(term) || 0;
+                        vector[idx] = tf * idf;
+                    }
+                });
+
+                return this.normalize(vector);
+            }
+
+            normalize(vector) {
+                const magnitude = Math.sqrt(vector.reduce((sum, val) => sum + val * val, 0));
+                return magnitude > 0 ? vector.map(val => val / magnitude) : vector;
+            }
+
+            tokenize(text) {
+                return text
+                    .toLowerCase()
+                    .replace(/[^\w\s]/g, ' ')
+                    .split(/\s+/)
+                    .filter(token => token.length > 2);
+            }
+        }
+
+        // ============================================================================
+        // COSINE SIMILARITY
+        // ============================================================================
+        
+        function cosineSimilarity(vecA, vecB) {
+            if (vecA.length !== vecB.length) return 0;
+            
+            let dotProduct = 0;
+            let magA = 0;
+            let magB = 0;
+            
+            for (let i = 0; i < vecA.length; i++) {
+                dotProduct += vecA[i] * vecB[i];
+                magA += vecA[i] * vecA[i];
+                magB += vecB[i] * vecB[i];
+            }
+            
+            magA = Math.sqrt(magA);
+            magB = Math.sqrt(magB);
+            
+            return magA > 0 && magB > 0 ? dotProduct / (magA * magB) : 0;
+        }
+
+        // ============================================================================
+        // IDENTITY RESOLUTION ENGINE
+        // ============================================================================
+        
+        class IdentityResolver {
+            constructor() {
+                this.identities = new Map();
+            }
+
+            register(identity) {
+                this.identities.set(identity.id, identity);
+            }
+
+            resolve(query) {
+                // Check for exact address match
+                if (this.identities.has(query)) {
+                    return this.identities.get(query);
+                }
+
+                // Check for alias match
+                for (const [id, identity] of this.identities) {
+                    if (identity.aliases.includes(query.toLowerCase())) {
+                        return identity;
+                    }
+                }
+
+                // Fuzzy match on aliases
+                const matches = [];
+                for (const [id, identity] of this.identities) {
+                    identity.aliases.forEach(alias => {
+                        const distance = this.levenshteinDistance(query.toLowerCase(), alias);
+                        if (distance <= 3) {
+                            matches.push({ identity, distance });
+                        }
+                    });
+                }
+
+                if (matches.length > 0) {
+                    matches.sort((a, b) => a.distance - b.distance);
+                    return matches[0].identity;
+                }
+
+                return null;
+            }
+
+            levenshteinDistance(a, b) {
+                const matrix = [];
+
+                for (let i = 0; i <= b.length; i++) {
+                    matrix[i] = [i];
+                }
+
+                for (let j = 0; j <= a.length; j++) {
+                    matrix[0][j] = j;
+                }
+
+                for (let i = 1; i <= b.length; i++) {
+                    for (let j = 1; j <= a.length; j++) {
+                        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                            matrix[i][j] = matrix[i - 1][j - 1];
+                        } else {
+                            matrix[i][j] = Math.min(
+                                matrix[i - 1][j - 1] + 1,
+                                matrix[i][j - 1] + 1,
+                                matrix[i - 1][j] + 1
+                            );
+                        }
+                    }
+                }
+
+                return matrix[b.length][a.length];
+            }
+        }
+
+        // ============================================================================
+        // HYBRID SEARCH ENGINE
+        // ============================================================================
+        
+        class HybridSearchEngine {
+            constructor() {
+                this.bm25 = new BM25();
+                this.vectorizer = new TfidfVectorizer();
+                this.identityResolver = new IdentityResolver();
+                this.documents = [];
+                this.documentVectors = [];
+            }
+
+            indexIdentity(identity) {
+                this.identityResolver.register(identity);
+                
+                Object.keys(identity.namespaces).forEach(namespace => {
+                    identity.namespaces[namespace].forEach(item => {
+                        const doc = {
+                            id: item.id,
+                            identityId: identity.id,
+                            namespace: namespace,
+                            title: item.title,
+                            text: item.content,
+                            tags: item.tags || [],
+                            created: item.created,
+                            metadata: item
+                        };
+                        
+                        this.documents.push(doc);
+                        this.bm25.addDocument(doc);
+                    });
+                });
+            }
+
+            build() {
+                this.bm25.build();
+                
+                // Build TF-IDF vectorizer
+                const texts = this.documents.map(doc => doc.text);
+                this.vectorizer.fit(texts);
+                
+                // Generate document vectors
+                this.documentVectors = this.documents.map(doc => 
+                    this.vectorizer.transform(doc.text)
+                );
+            }
+
+            search(query, options = {}) {
+                const {
+                    identityId = null,
+                    namespace = null,
+                    mode = 'hybrid',
+                    fusionAlpha = 0.5,
+                    maxResults = 10
+                } = options;
+
+                // Filter documents by identity and namespace
+                let filteredDocs = this.documents;
+                let filteredVectors = this.documentVectors;
+                
+                if (identityId) {
+                    const indices = [];
+                    filteredDocs = this.documents.filter((doc, idx) => {
+                        if (doc.identityId === identityId) {
+                            indices.push(idx);
+                            return true;
+                        }
+                        return false;
+                    });
+                    filteredVectors = indices.map(idx => this.documentVectors[idx]);
+                }
+
+                if (namespace) {
+                    const indices = [];
+                    filteredDocs = filteredDocs.filter((doc, idx) => {
+                        if (doc.namespace === namespace) {
+                            indices.push(idx);
+                            return true;
+                        }
+                        return false;
+                    });
+                    filteredVectors = indices.map(idx => filteredVectors[idx]);
+                }
+
+                if (filteredDocs.length === 0) {
+                    return [];
+                }
+
+                // Perform search based on mode
+                let results = [];
+
+                if (mode === 'sparse' || mode === 'hybrid') {
+                    // BM25 search
+                    const tempBM25 = new BM25();
+                    filteredDocs.forEach(doc => tempBM25.addDocument(doc));
+                    tempBM25.build();
+                    
+                    const sparseResults = tempBM25.search(query, filteredDocs.length);
+                    results = sparseResults.map(r => ({
+                        ...r.doc,
+                        sparseScore: r.score
+                    }));
+                }
+
+                if (mode === 'dense' || mode === 'hybrid') {
+                    // Dense semantic search
+                    const queryVector = this.vectorizer.transform(query);
+                    
+                    const denseScores = filteredVectors.map((docVec, idx) => ({
+                        doc: filteredDocs[idx],
+                        denseScore: cosineSimilarity(queryVector, docVec)
+                    }));
+
+                    if (mode === 'dense') {
+                        results = denseScores.map(r => ({
+                            ...r.doc,
+                            denseScore: r.denseScore,
+                            sparseScore: 0
+                        }));
+                    } else {
+                        // Merge dense scores with sparse results
+                        results = results.map(result => {
+                            const denseResult = denseScores.find(d => d.doc.id === result.id);
+                            return {
+                                ...result,
+                                denseScore: denseResult ? denseResult.denseScore : 0
+                            };
+                        });
+                    }
+                }
+
+                // Calculate final score with fusion
+                results = results.map(result => ({
+                    ...result,
+                    finalScore: (1 - fusionAlpha) * (result.sparseScore || 0) + 
+                                fusionAlpha * (result.denseScore || 0)
+                }));
+
+                // Sort by final score
+                results.sort((a, b) => b.finalScore - a.finalScore);
+
+                return results.slice(0, maxResults);
+            }
+        }
+
+        // ============================================================================
+        // DATA GENERATION
+        // ============================================================================
+        
+        function generateMockData() {
+            return [
+                {
+                    id: '0xA1B2C3D4E5F6',
+                    address: '0xA1B2C3D4E5F6789012345678',
+                    aliases: ['alice', 'alice.sovereign', 'alice_researcher'],
+                    namespaces: {
+                        posts: [
+                            {
+                                id: 'post_001',
+                                title: 'Decentralized Identity Systems',
+                                content: 'Exploring the fundamental principles of decentralized identity systems and their role in sovereign computing. Self-sovereign identity gives users control over their personal data.',
+                                tags: ['identity', 'blockchain', 'privacy'],
+                                created: Date.now() - 86400000
+                            },
+                            {
+                                id: 'post_002',
+                                title: 'Cryptographic Protocols for Privacy',
+                                content: 'A deep dive into zero-knowledge proofs and homomorphic encryption for preserving privacy in distributed systems. These protocols enable verification without revealing sensitive data.',
+                                tags: ['cryptography', 'privacy', 'security'],
+                                created: Date.now() - 172800000
+                            },
+                            {
+                                id: 'post_003',
+                                title: 'The Future of Peer-to-Peer Networks',
+                                content: 'How P2P networks are evolving with WebRTC and libp2p to create truly decentralized applications. Direct peer connections eliminate central points of failure.',
+                                tags: ['p2p', 'networking', 'decentralization'],
+                                created: Date.now() - 259200000
+                            }
+                        ],
+                        videos: [
+                            {
+                                id: 'video_001',
+                                title: 'Introduction to Sovereign Computing',
+                                content: 'A comprehensive video series explaining sovereign computing principles, content-addressed storage, and cryptographic verification.',
+                                tags: ['tutorial', 'video', 'education'],
+                                created: Date.now() - 345600000
+                            }
+                        ],
+                        files: [
+                            {
+                                id: 'file_001',
+                                title: 'Research Paper: Merkle Trees in Practice',
+                                content: 'Academic paper discussing practical implementations of Merkle trees for data integrity verification in distributed systems.',
+                                tags: ['research', 'merkle', 'data-structures'],
+                                created: Date.now() - 432000000
+                            }
+                        ]
+                    }
+                },
+                {
+                    id: '0xF6E5D4C3B2A1',
+                    address: '0xF6E5D4C3B2A1987654321',
+                    aliases: ['bob', 'bob.dev', 'robertsmith'],
+                    namespaces: {
+                        posts: [
+                            {
+                                id: 'post_004',
+                                title: 'Building Hybrid Search Engines',
+                                content: 'Combining BM25 sparse retrieval with dense semantic search using embeddings. Hybrid approaches leverage the strengths of both keyword and semantic matching.',
+                                tags: ['search', 'ai', 'information-retrieval'],
+                                created: Date.now() - 518400000
+                            },
+                            {
+                                id: 'post_005',
+                                title: 'IPFS and Content Addressing',
+                                content: 'Understanding content-addressed storage with IPFS and how it enables permanent, verifiable data storage. CIDs provide cryptographic guarantees of content integrity.',
+                                tags: ['ipfs', 'storage', 'distributed-systems'],
+                                created: Date.now() - 604800000
+                            },
+                            {
+                                id: 'post_006',
+                                title: 'Smart Contract Security Best Practices',
+                                content: 'Essential security considerations when developing smart contracts including reentrancy guards, access control, and gas optimization.',
+                                tags: ['blockchain', 'security', 'smart-contracts'],
+                                created: Date.now() - 691200000
+                            }
+                        ],
+                        workflows: [
+                            {
+                                id: 'workflow_001',
+                                title: 'Automated Data Pipeline',
+                                content: 'JSONFlow workflow for processing and analyzing blockchain transaction data with automated verification steps.',
+                                tags: ['automation', 'data', 'workflow'],
+                                created: Date.now() - 777600000
+                            }
+                        ],
+                        messages: [
+                            {
+                                id: 'msg_001',
+                                title: 'Collaboration Request',
+                                content: 'Interested in collaborating on a decentralized messaging protocol. Let me know if you have time to discuss implementation details.',
+                                tags: ['collaboration', 'messaging'],
+                                created: Date.now() - 86400000
+                            }
+                        ]
+                    }
+                },
+                {
+                    id: '0x123456789ABC',
+                    address: '0x123456789ABCDEF',
+                    aliases: ['charlie', 'coder_charlie', 'charles'],
+                    namespaces: {
+                        posts: [
+                            {
+                                id: 'post_007',
+                                title: 'Quantum-Resistant Cryptography',
+                                content: 'Preparing for the post-quantum era with lattice-based and hash-based cryptographic schemes. NIST is standardizing quantum-resistant algorithms.',
+                                tags: ['quantum', 'cryptography', 'security'],
+                                created: Date.now() - 864000000
+                            },
+                            {
+                                id: 'post_008',
+                                title: 'Decentralized Autonomous Organizations',
+                                content: 'How DAOs are transforming organizational governance through transparent, code-based decision making and treasury management.',
+                                tags: ['dao', 'governance', 'blockchain'],
+                                created: Date.now() - 950400000
+                            }
+                        ],
+                        videos: [
+                            {
+                                id: 'video_002',
+                                title: 'Web3 Development Tutorial',
+                                content: 'Complete tutorial on building decentralized applications with Web3.js, ethers.js, and IPFS integration.',
+                                tags: ['tutorial', 'web3', 'development'],
+                                created: Date.now() - 1036800000
+                            }
+                        ]
+                    }
+                }
+            ];
+        }
+
+        // ============================================================================
+        // UI STATE MANAGEMENT
+        // ============================================================================
+        
+        let searchEngine = new HybridSearchEngine();
+        let currentIdentity = null;
+        let currentNamespace = null;
+        let allIdentities = [];
+        let lastSearchTime = 0;
+
+        // Initialize
+        function init() {
+            // Generate and index data
+            allIdentities = generateMockData();
+            allIdentities.forEach(identity => searchEngine.indexIdentity(identity));
+            searchEngine.build();
+
+            // Render identities
+            renderIdentities();
+            renderNamespaces();
+
+            // Setup event listeners
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+
+            console.log('Search engine initialized with', searchEngine.documents.length, 'documents');
+        }
+
+        function renderIdentities() {
+            const container = document.getElementById('identitiesList');
+            container.innerHTML = allIdentities.map(identity => `
+                <div class="identity-card ${currentIdentity === identity.id ? 'active' : ''}" 
+                     onclick="selectIdentity('${identity.id}')">
+                    <div style="font-weight: 700; margin-bottom: 0.5rem; color: var(--accent-cyan);">
+                        ${identity.aliases[0]}
+                    </div>
+                    <div class="identity-address">${identity.address}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderNamespaces() {
+            const namespaces = ['all', 'posts', 'videos', 'files', 'workflows', 'messages'];
+            const container = document.getElementById('namespaceTabs');
+            container.innerHTML = namespaces.map(ns => `
+                <div class="namespace-tab ${currentNamespace === ns || (ns === 'all' && !currentNamespace) ? 'active' : ''}"
+                     onclick="selectNamespace('${ns}')">
+                    ${ns}
+                </div>
+            `).join('');
+        }
+
+        function selectIdentity(identityId) {
+            currentIdentity = currentIdentity === identityId ? null : identityId;
+            renderIdentities();
+            
+            if (document.getElementById('searchInput').value) {
+                performSearch();
+            }
+        }
+
+        function selectNamespace(namespace) {
+            currentNamespace = namespace === 'all' ? null : namespace;
+            renderNamespaces();
+            
+            if (document.getElementById('searchInput').value) {
+                performSearch();
+            }
+        }
+
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+
+            const startTime = performance.now();
+
+            // Try identity resolution first
+            const resolvedIdentity = searchEngine.identityResolver.resolve(query);
+            
+            const fusionAlpha = parseInt(document.getElementById('fusionAlpha').value) / 100;
+            const maxResults = parseInt(document.getElementById('maxResults').value);
+            const mode = document.getElementById('searchMode').value;
+
+            const results = searchEngine.search(query, {
+                identityId: currentIdentity,
+                namespace: currentNamespace,
+                mode: mode,
+                fusionAlpha: fusionAlpha,
+                maxResults: maxResults
+            });
+
+            lastSearchTime = performance.now() - startTime;
+
+            renderResults(results, query, resolvedIdentity);
+        }
+
+        function renderResults(results, query, resolvedIdentity) {
+            const container = document.getElementById('resultsContainer');
+            
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p>No results found for "${query}"</p>
+                    </div>
+                `;
+                renderStats(results);
+                return;
+            }
+
+            container.innerHTML = results.map((result, idx) => `
+                <div class="result-item" style="animation-delay: ${idx * 0.05}s;">
+                    <div class="result-header">
+                        <div>
+                            <div class="result-title">${result.title}</div>
+                            <div class="result-meta">
+                                <span style="color: var(--accent-cyan);">${result.identityId.substring(0, 12)}</span>
+                                • ${result.namespace}
+                                • ${new Date(result.created).toLocaleDateString()}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-content">
+                        ${highlightQuery(result.text, query)}
+                    </div>
+                    
+                    <div class="result-scores">
+                        <div class="score-badge">
+                            <span class="score-label">Final</span>
+                            <span class="score-value ${getScoreClass(result.finalScore)}">
+                                ${result.finalScore.toFixed(3)}
+                            </span>
+                        </div>
+                        <div class="score-badge">
+                            <span class="score-label">Dense</span>
+                            <span class="score-value ${getScoreClass(result.denseScore || 0)}">
+                                ${(result.denseScore || 0).toFixed(3)}
+                            </span>
+                        </div>
+                        <div class="score-badge">
+                            <span class="score-label">Sparse</span>
+                            <span class="score-value ${getScoreClass(result.sparseScore || 0)}">
+                                ${(result.sparseScore || 0).toFixed(3)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            renderStats(results);
+        }
+
+        function renderStats(results) {
+            const container = document.getElementById('statsBar');
+            const avgDense = results.reduce((sum, r) => sum + (r.denseScore || 0), 0) / results.length || 0;
+            const avgSparse = results.reduce((sum, r) => sum + (r.sparseScore || 0), 0) / results.length || 0;
+            
+            container.innerHTML = `
+                <div class="stats-bar">
+                    <div class="stat">
+                        <div class="stat-value">${results.length}</div>
+                        <div class="stat-label">Results</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${lastSearchTime.toFixed(1)}ms</div>
+                        <div class="stat-label">Search Time</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${avgDense.toFixed(3)}</div>
+                        <div class="stat-label">Avg Dense</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${avgSparse.toFixed(3)}</div>
+                        <div class="stat-label">Avg Sparse</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function highlightQuery(text, query) {
+            const words = query.toLowerCase().split(/\s+/);
+            let highlighted = text;
+            
+            words.forEach(word => {
+                if (word.length > 2) {
+                    const regex = new RegExp(`(${word})`, 'gi');
+                    highlighted = highlighted.replace(regex, '<span style="background: var(--accent-magenta); color: var(--bg-dark); padding: 2px 4px; border-radius: 3px; font-weight: 700;">$1</span>');
+                }
+            });
+            
+            return highlighted.substring(0, 300) + (text.length > 300 ? '...' : '');
+        }
+
+        function getScoreClass(score) {
+            if (score > 0.5) return 'high';
+            if (score > 0.2) return 'medium';
+            return 'low';
+        }
+
+        function updateRangeValue(id) {
+            const input = document.getElementById(id);
+            const display = document.getElementById(id + 'Value');
+            display.textContent = (parseInt(input.value) / 100).toFixed(2);
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

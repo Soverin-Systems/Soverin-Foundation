@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Creator Studio — Frontend ↔ Backend Schema</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@500;600;700;800&display=swap');
+
+  :root {
+    --ink: #0e0e0f;
+    --paper: #f5f2ec;
+    --paper-dark: #ebe7df;
+    --cream: #faf8f4;
+    --rust: #c2462a;
+    --rust-pale: rgba(194,70,42,.08);
+    --teal: #1a6b5a;
+    --teal-pale: rgba(26,107,90,.07);
+    --slate: #3d4f5f;
+    --slate-pale: rgba(61,79,95,.06);
+    --amber: #b57a1e;
+    --amber-pale: rgba(181,122,30,.07);
+    --violet: #5b3d8a;
+    --violet-pale: rgba(91,61,138,.07);
+    --mid: #8a8580;
+    --border: #d9d4cc;
+    --glow-rust: 0 0 0 2px var(--rust);
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--ink);
+    color: #fff;
+    padding: .7rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-size: .78rem;
+    letter-spacing: .6px;
+  }
+  .topbar .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: -0.5px;
+  }
+  .topbar .logo span { color: var(--rust); }
+  .topbar .meta { opacity: .5; font-size: .72rem; }
+
+  /* ── NAV PILLS ── */
+  .nav {
+    background: var(--paper-dark);
+    border-bottom: 1px solid var(--border);
+    padding: .55rem 2rem;
+    display: flex;
+    gap: .4rem;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 34px;
+    z-index: 99;
+  }
+  .pill {
+    padding: .32rem .75rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    font-family: inherit;
+    font-size: .76rem;
+    font-weight: 600;
+    color: var(--mid);
+    cursor: pointer;
+    transition: all .15s;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+  }
+  .pill:hover { background: var(--slate-pale); color: var(--slate); }
+  .pill.active { background: var(--ink); color: #fff; }
+
+  /* ── PAGE SECTIONS ── */
+  .page { display: none; padding: 2.2rem 2rem 3rem; max-width: 1100px; margin: 0 auto; }
+  .page.active { display: block; animation: fadeUp .25s ease; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── SECTION HEADER ── */
+  .section-head {
+    margin-bottom: 1.6rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+  .section-head h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+  }
+  .section-head .tag {
+    font-size: .7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--rust);
+  }
+
+  /* ── CODE BLOCKS ── */
+  .code-wrap {
+    background: var(--ink);
+    border-radius: 10px;
+    margin: .9rem 0 1.4rem;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,.1);
+  }
+  .code-label {
+    background: rgba(255,255,255,.06);
+    padding: .35rem .8rem;
+    font-size: .7rem;
+    font-weight: 600;
+    color: rgba(255,255,255,.4);
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .code-label .copy-btn {
+    cursor: pointer;
+    color: rgba(255,255,255,.35);
+    font-size: .68rem;
+    background: none;
+    border: none;
+    font-family: inherit;
+    transition: color .15s;
+  }
+  .code-label .copy-btn:hover { color: #fff; }
+  pre {
+    padding: 1rem .9rem;
+    color: #e8e4dc;
+    font-size: 12.5px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  /* syntax colours */
+  .kw  { color: #f28d6b; }  /* keyword / type name */
+  .tp  { color: #7ec8c4; }  /* type reference */
+  .str { color: #c9ba8c; }  /* string literal */
+  .cmt { color: #5a6068; font-style: italic; }  /* comment */
+  .nm  { color: #d4d0c8; }  /* plain name */
+  .op  { color: #8a8580; }  /* punctuation */
+  .num { color: #b49fd4; }  /* numbers */
+  .dec { color: #f0c66c; }  /* decorator / route verb */
+
+  /* ── ENTITY CARDS (types page) ── */
+  .entity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+  .entity-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .entity-card:hover { box-shadow: 0 3px 16px rgba(0,0,0,.08); }
+  .entity-card-head {
+    padding: .55rem .85rem;
+    font-weight: 700;
+    font-size: .82rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .entity-card-head .ent-name { letter-spacing: .4px; }
+  .entity-card-head .ent-badge {
+    font-size: .62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .9px;
+    padding: .15rem .5rem;
+    border-radius: 999px;
+  }
+  .ent-badge.persisted { background: var(--teal-pale); color: var(--teal); }
+  .ent-badge.runtime  { background: var(--amber-pale); color: var(--amber); }
+  .ent-badge.aggregate{ background: var(--violet-pale); color: var(--violet); }
+
+  .entity-card-head.c-rust { background: var(--rust-pale); }
+  .entity-card-head.c-teal { background: var(--teal-pale); }
+  .entity-card-head.c-slate{ background: var(--slate-pale); }
+  .entity-card-head.c-amber{ background: var(--amber-pale); }
+  .entity-card-head.c-violet{background: var(--violet-pale);}
+
+  .field-row {
+    display: flex;
+    padding: .28rem .85rem;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(0,0,0,.04);
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-row:hover { background: rgba(0,0,0,.02); }
+  .field-name { width: 135px; font-weight: 600; color: var(--ink); flex-shrink: 0; }
+  .field-type { color: var(--teal); font-weight: 500; min-width: 90px; }
+  .field-note { color: var(--mid); font-size: 11px; margin-left: auto; text-align: right; }
+  .field-row .pk { color: var(--rust); font-size: 10px; font-weight: 700; margin-left: 4px; }
+  .field-row .fk { color: var(--violet); font-size: 10px; font-weight: 700; margin-left: 4px; }
+  .field-row .opt{ color: var(--mid); font-size: 11px; }
+
+  /* ── ENUM CHIPS ── */
+  .enum-row {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .6rem .85rem;
+    margin: .45rem 0;
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    flex-wrap: wrap;
+  }
+  .enum-name { font-weight: 700; font-size: .8rem; min-width: 110px; color: var(--ink); }
+  .enum-chip {
+    background: var(--ink);
+    color: #e8e4dc;
+    padding: .18rem .55rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 500;
+  }
+
+  /* ── ROUTE TABLE ── */
+  .route-group-label {
+    font-family: 'Syne', sans-serif;
+    font-size: .95rem;
+    font-weight: 700;
+    margin: 1.4rem 0 .5rem;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+  }
+  .route-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: .4rem;
+  }
+  .route-table th {
+    text-align: left;
+    font-size: .67rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--mid);
+    padding: .38rem .6rem;
+    border-bottom: 2px solid var(--border);
+    background: var(--paper-dark);
+  }
+  .route-table td {
+    padding: .42rem .6rem;
+    border-bottom: 1px solid rgba(0,0,0,.05);
+    vertical-align: top;
+    font-size: 12.5px;
+  }
+  .route-table tr:hover td { background: rgba(0,0,0,.02); }
+
+  .verb {
+    font-weight: 700;
+    font-size: .72rem;
+    padding: .16rem .42rem;
+    border-radius: 4px;
+    letter-spacing: .6px;
+  }
+  .verb.get    { background: #d4edda; color: #155724; }
+  .verb.post   { background: #cce5ff; color: #004085; }
+  .verb.put    { background: #fff3cd; color: #856404; }
+  .verb.delete { background: #f8d7da; color: #721c24; }
+  .verb.ws     { background: var(--violet-pale); color: var(--violet); }
+
+  .route-path { font-weight: 600; color: var(--ink); }
+  .route-path .param { color: var(--rust); }
+
+  /* ── STORAGE TABLE ── */
+  .storage-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: .6rem 0;
+  }
+  .storage-table th {
+    text-align:left; font-size:.67rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:1px; color:var(--mid); padding:.38rem .6rem;
+    border-bottom:2px solid var(--border); background:var(--paper-dark);
+  }
+  .storage-table td { padding:.42rem .6rem; border-bottom:1px solid rgba(0,0,0,.05); font-size:12.5px; }
+  .storage-table tr:hover td { background:rgba(0,0,0,.02); }
+  .storage-key { font-weight:600; color:var(--rust); }
+  .storage-type-tag {
+    font-size:.68rem; font-weight:600; padding:.12rem .4rem; border-radius:999px;
+  }
+  .storage-type-tag.json { background:var(--teal-pale); color:var(--teal); }
+  .storage-type-tag.str  { background:var(--amber-pale); color:var(--amber); }
+
+  /* ── ER DIAGRAM ── */
+  .er-container {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+  .er-container svg { display:block; margin:0 auto; }
+
+  /* ── FLOW DIAGRAM (auto-publish lifecycle) ── */
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+    margin: .8rem 0;
+  }
+  .flow-box {
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: .5rem .85rem;
+    font-size: .78rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .flow-box.start { border-color: var(--teal); background: var(--teal-pale); color: var(--teal); }
+  .flow-box.mid   { border-color: var(--amber); background: var(--amber-pale); color: var(--amber); }
+  .flow-box.end   { border-color: var(--rust); background: var(--rust-pale); color: var(--rust); }
+  .flow-arrow { color: var(--mid); font-size: 1.1rem; font-weight:700; }
+
+  /* ── WS FRAME CARDS ── */
+  .ws-frame {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .7rem .9rem;
+    margin: .55rem 0;
+  }
+  .ws-frame-head { font-weight:700; font-size:.78rem; margin-bottom:.25rem; display:flex; gap:.6rem; align-items:center; }
+  .ws-dir { font-size:.65rem; font-weight:700; padding:.1rem .38rem; border-radius:999px; letter-spacing:.5px; }
+  .ws-dir.inbound  { background:var(--teal-pale); color:var(--teal); }
+  .ws-dir.outbound { background:var(--rust-pale); color:var(--rust); }
+  .ws-dir.bidir    { background:var(--violet-pale); color:var(--violet); }
+
+  /* ── MISC ── */
+  .note {
+    background: var(--amber-pale);
+    border-left: 3px solid var(--amber);
+    padding: .6rem .85rem;
+    border-radius: 0 8px 8px 0;
+    font-size: 12px;
+    margin: 1rem 0;
+    color: var(--ink);
+  }
+  .note strong { color: var(--amber); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.8rem 0; }
+
+  @media(max-width:600px){
+    .nav { padding:.4rem .8rem; }
+    .page { padding:1.4rem .8rem 2.5rem; }
+    .entity-grid { grid-template-columns:1fr; }
+    .route-table { font-size:11px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">Creator<span>Studio</span> <span style="color:rgba(255,255,255,.3);font-weight:400;font-size:.72rem;margin-left:.6rem;">schema v1.0</span></div>
+  <div class="meta">Generated from live codebase · Feb 2025</div>
+</div>
+
+<!-- NAV -->
+<div class="nav" id="nav"></div>
+
+<!-- ============================================================
+     PAGE: TYPES
+     ============================================================ -->
+<div class="page active" id="page-types">
+  <div class="section-head">
+    <h1>Data Types</h1>
+    <span class="tag">Core Entities</span>
+  </div>
+
+  <!-- entity cards injected by JS -->
+  <div class="entity-grid" id="entity-grid"></div>
+
+  <hr class="divider"/>
+
+  <div class="section-head" style="margin-top:1.2rem;">
+    <h1>Enums</h1>
+    <span class="tag">Shared Constants</span>
+  </div>
+  <div id="enum-list"></div>
+</div>
+
+<!-- ============================================================
+     PAGE: CONTRACTS
+     ============================================================ -->
+<div class="page" id="page-contracts">
+  <div class="section-head">
+    <h1>Request / Response Contracts</h1>
+    <span class="tag">TypeScript</span>
+  </div>
+  <div id="contracts-code"></div>
+</div>
+
+<!-- ============================================================
+     PAGE: ROUTES
+     ============================================================ -->
+<div class="page" id="page-routes">
+  <div class="section-head">
+    <h1>REST + WebSocket Routes</h1>
+    <span class="tag">API Surface</span>
+  </div>
+  <div id="routes-content"></div>
+</div>
+
+<!-- ============================================================
+     PAGE: STORAGE
+     ============================================================ -->
+<div class="page" id="page-storage">
+  <div class="section-head">
+    <h1>localStorage Manifest</h1>
+    <span class="tag">Client Persistence</span>
+  </div>
+  <div class="note"><strong>Note:</strong> All keys are namespaced under <code>creator_</code>. Serialisation is <code>JSON.stringify</code> unless noted. The private key is stored as a plain JSON array of byte values — treat as highly sensitive.</div>
+  <table class="storage-table" id="storage-table"></table>
+</div>
+
+<!-- ============================================================
+     PAGE: MESSAGES
+     ============================================================ -->
+<div class="page" id="page-messages">
+  <div class="section-head">
+    <h1>P2P Message Frames</h1>
+    <span class="tag">PeerJS WebSocket</span>
+  </div>
+  <div id="messages-content"></div>
+
+  <hr class="divider"/>
+
+  <div class="section-head" style="margin-top:1rem;">
+    <h1>Auto-Publish Lifecycle</h1>
+    <span class="tag">State Machine</span>
+  </div>
+  <div id="lifecycle-content"></div>
+</div>
+
+<!-- ============================================================
+     PAGE: ER DIAGRAM
+     ============================================================ -->
+<div class="page" id="page-er">
+  <div class="section-head">
+    <h1>Entity Relationships</h1>
+    <span class="tag">Visual Map</span>
+  </div>
+  <div class="er-container" id="er-container"></div>
+  <div class="note" style="margin-top:1rem;"><strong>Legend:</strong> Solid lines = persisted FK. Dashed = runtime / ephemeral link. <em>content.nft</em> is an embedded sub-document AND mirrored to the top-level <code>nfts[]</code> array.</div>
+</div>
+
+<!-- ============================================================
+     SCRIPT
+     ============================================================ -->
+<script>
+// ─── DATA ────────────────────────────────────────────────────
+
+const ENTITIES = [
+  {
+    name:'Content', color:'c-rust', badge:'persisted', badge_cls:'persisted',
+    fields:[
+      { name:'id',            type:'string',       note:'PK · content-{ts}-{rand}', flags:'pk' },
+      { name:'title',         type:'string',       note:'' },
+      { name:'body',          type:'string',       note:'full markdown body' },
+      { name:'type',          type:'ContentType',  note:'' },
+      { name:'visibility',    type:'Visibility',   note:'' },
+      { name:'tags',          type:'string[]',     note:'comma-split on input' },
+      { name:'license',       type:'License',      note:'embedded object' },
+      { name:'author',        type:'string',       note:'DID of creator' },
+      { name:'created',       type:'number',       note:'epoch ms' },
+      { name:'views',         type:'number',       note:'' },
+      { name:'likes',         type:'number',       note:'' },
+      { name:'earnings',      type:'number',       note:'USD accumulator' },
+      { name:'status',        type:'"published"',  note:'always published' },
+      { name:'nft',           type:'NFT | null',   note:'optional embed', flags:'opt' },
+      { name:'signature',     type:'number[]',     note:'ed25519 sig bytes' },
+      { name:'canonicalHash', type:'string',       note:'sha-256 hex' },
+    ]
+  },
+  {
+    name:'Draft', color:'c-teal', badge:'persisted', badge_cls:'persisted',
+    fields:[
+      { name:'id',      type:'string',      note:'PK · draft-{ts}', flags:'pk' },
+      { name:'title',   type:'string',      note:'' },
+      { name:'body',    type:'string',      note:'' },
+      { name:'type',    type:'ContentType', note:'' },
+      { name:'created', type:'number',      note:'epoch ms' },
+      { name:'updated', type:'number',      note:'epoch ms' },
+      { name:'status',  type:'"draft"',     note:'always draft' },
+    ]
+  },
+  {
+    name:'NFT', color:'c-violet', badge:'persisted', badge_cls:'persisted',
+    fields:[
+      { name:'id',          type:'string', note:'PK · nft-{uuid}',  flags:'pk' },
+      { name:'contentId',   type:'string', note:'FK → Content.id',  flags:'fk' },
+      { name:'title',       type:'string', note:'denorm from Content' },
+      { name:'royalty',     type:'number', note:'0 – 50 %' },
+      { name:'edition',    type:'number', note:'0 = unlimited' },
+      { name:'minted',     type:'number', note:'epoch ms' },
+      { name:'contentHash',type:'string', note:'sha-256 of body' },
+    ]
+  },
+  {
+    name:'Collaborator', color:'c-slate', badge:'persisted', badge_cls:'persisted',
+    fields:[
+      { name:'id',      type:'string',     note:'PK · collab-{ts}', flags:'pk' },
+      { name:'email',   type:'string',     note:'or DID' },
+      { name:'role',    type:'CollabRole', note:'' },
+      { name:'invited', type:'number',     note:'epoch ms' },
+      { name:'status',  type:'CollabStatus', note:'' },
+    ]
+  },
+  {
+    name:'ScheduledPost', color:'c-amber', badge:'persisted', badge_cls:'persisted',
+    fields:[
+      { name:'id',           type:'string',  note:'PK · sched-{ts}', flags:'pk' },
+      { name:'contentId',    type:'string',  note:'FK → Draft.id',   flags:'fk' },
+      { name:'scheduledFor', type:'number',  note:'epoch ms' },
+      { name:'created',      type:'number',  note:'epoch ms' },
+      { name:'published',    type:'boolean', note:'set on auto-pub', flags:'opt' },
+    ]
+  },
+  {
+    name:'Identity', color:'c-rust', badge:'persisted', badge_cls:'persisted',
+    fields:[
+      { name:'keyPair',  type:'Uint8Array', note:'32 b private key  ⚠️' },
+      { name:'did',      type:'string',     note:'did:key:z…' },
+      { name:'pubkey',   type:'string',     note:'hex-encoded' },
+      { name:'peerId',   type:'string',     note:'creator-{rand12}' },
+    ]
+  },
+  {
+    name:'Peer', color:'c-amber', badge:'runtime', badge_cls:'runtime',
+    fields:[
+      { name:'id',        type:'string', note:'peerId' },
+      { name:'connected', type:'number', note:'epoch ms' },
+    ]
+  },
+  {
+    name:'Stats', color:'c-violet', badge:'aggregate', badge_cls:'aggregate',
+    fields:[
+      { name:'views',        type:'number', note:'sum of content.views' },
+      { name:'subscribers',  type:'number', note:'' },
+      { name:'earnings',     type:'number', note:'sum of content.earnings' },
+      { name:'contentCount', type:'number', note:'content.length' },
+    ]
+  },
+];
+
+const ENUMS = [
+  { name:'ContentType',  values:['article','tutorial','video','podcast','course','newsletter'] },
+  { name:'Visibility',   values:['public','subscribers','premium','unlisted'] },
+  { name:'LicenseType',  values:['cc-by','cc-by-sa','cc-by-nc','cc-by-nd','commercial','exclusive','custom'] },
+  { name:'CollabRole',   values:['viewer','editor','admin'] },
+  { name:'CollabStatus', values:['pending','accepted','declined'] },
+  { name:'Theme',        values:['aero','dark'] },
+  { name:'OllamaModel',  values:['llama3.2','llama2','mistral','phi','neural-chat'] },
+  { name:'NotifType',    values:['info','success','warning','error'] },
+];
+
+const ROUTES = [
+  { group:'Identity', rows:[
+    { verb:'POST', path:'/identity/generate',  req:'—',                     res:'{ did, pubkey }',             note:'Creates ed25519 keypair client-side' },
+    { verb:'GET',  path:'/identity/export',    req:'—',                     res:'Blob (JSON keypair file)',   note:'Downloads keypair + DID' },
+    { verb:'POST', path:'/identity/import',    req:'File (JSON keypair)',   res:'{ did, pubkey }',             note:'Restores from exported file' },
+  ]},
+  { group:'Content', rows:[
+    { verb:'POST', path:'/content/publish',    req:'ContentPayload',        res:'SignedContent',               note:'Signs + stores + broadcasts' },
+    { verb:'POST', path:'/content/draft',      req:'DraftPayload',          res:'Draft',                       note:'Saves without signing' },
+    { verb:'GET',  path:'/content/:id',        req:'—',                     res:'Content | Draft',             note:'Single item lookup' },
+    { verb:'GET',  path:'/content',            req:'?status&type&nft',      res:'(Content | Draft)[]',         note:'Filterable list' },
+  ]},
+  { group:'NFT', rows:[
+    { verb:'POST', path:'/nft/mint',           req:'NFTPayload',            res:'NFT',                         note:'Attaches to published content' },
+  ]},
+  { group:'Collaboration', rows:[
+    { verb:'POST', path:'/collaborators/invite', req:'{ email }',           res:'Collaborator',                note:'Sends invitation' },
+    { verb:'DELETE',path:'/collaborators/:id',   req:'—',                   res:'{ ok: true }',                note:'Removes from team' },
+  ]},
+  { group:'Scheduling', rows:[
+    { verb:'POST', path:'/schedule',           req:'SchedulePayload',       res:'ScheduledPost',               note:'Queues future publish' },
+    { verb:'DELETE',path:'/schedule/:id',      req:'—',                     res:'{ ok: true }',                note:'Cancels scheduled post' },
+    { verb:'GET',  path:'/schedule',           req:'—',                     res:'ScheduledPost[]',             note:'All upcoming + published' },
+  ]},
+  { group:'AI (Ollama Proxy)', rows:[
+    { verb:'POST', path:'/ai/enhance',         req:'{ body, model }',       res:'{ enhanced: string }',       note:'Content rewrite' },
+    { verb:'POST', path:'/ai/suggest-title',   req:'{ body, model }',       res:'{ titles: string[] }',       note:'Returns 3 title candidates' },
+    { verb:'GET',  path:'/ai/health',          req:'—',                     res:'{ models: string[] }',       note:'Pings Ollama /api/tags' },
+  ]},
+  { group:'Analytics', rows:[
+    { verb:'GET',  path:'/analytics/views',    req:'?period=7d|30d|90d|1y', res:'TimeSeriesData',             note:'Views over time' },
+    { verb:'GET',  path:'/analytics/revenue',  req:'?period=…',             res:'TimeSeriesData',             note:'Revenue over time' },
+    { verb:'GET',  path:'/analytics/top-content', req:'?limit=5',           res:'Content[]',                   note:'Sorted by views desc' },
+    { verb:'GET',  path:'/analytics/insights', req:'—',                     res:'AudienceInsights',            note:'Read time, engagement …' },
+  ]},
+  { group:'Monetization', rows:[
+    { verb:'GET',  path:'/monetize/earnings',  req:'—',                     res:'EarningsBreakdown',           note:'sales / nft / subs / tips' },
+    { verb:'POST', path:'/monetize/withdraw',  req:'{ amount }',            res:'{ ok: true }',                note:'STUB — not yet live' },
+    { verb:'PUT',  path:'/monetize/tiers/:tier', req:'TierPayload',         res:'Tier',                        note:'STUB — not yet live' },
+  ]},
+  { group:'P2P (WebSocket)', rows:[
+    { verb:'WS',   path:'/peer/connect',       req:'peerId',                res:'connection handle',           note:'PeerJS signalling' },
+    { verb:'POST', path:'/peer/broadcast',     req:'SignedContent',         res:'{ delivered: number }',       note:'Fan-out to all peers' },
+  ]},
+];
+
+const STORAGE = [
+  { key:'creator_keypair',       type:'JSON',  shape:'number[]',           note:'Uint8Array bytes, 32 elements. SENSITIVE.' },
+  { key:'creator_did',           type:'str',   shape:'string',             note:'did:key:z… identifier' },
+  { key:'creator_peerid',        type:'str',   shape:'string',             note:'creator-{rand12}' },
+  { key:'creator_theme',         type:'str',   shape:'"aero"|"dark"',      note:'UI theme preference' },
+  { key:'creator_content',       type:'JSON',  shape:'Content[]',          note:'All published items' },
+  { key:'creator_drafts',        type:'JSON',  shape:'Draft[]',            note:'Unsaved work' },
+  { key:'creator_nfts',          type:'JSON',  shape:'NFT[]',              note:'Top-level NFT registry' },
+  { key:'creator_stats',         type:'JSON',  shape:'Stats',              note:'Derived aggregate' },
+  { key:'creator_collaborators', type:'JSON',  shape:'Collaborator[]',     note:'Team members' },
+  { key:'creator_scheduled',     type:'JSON',  shape:'ScheduledPost[]',    note:'Pending + completed' },
+  { key:'creator_last_save',     type:'str',   shape:'string',             note:'epoch ms — last write timestamp' },
+];
+
+const WS_FRAMES = [
+  {
+    name:'Handshake',
+    dir:'bidir',
+    dirLabel:'Both directions',
+    desc:'Exchanged immediately after a peer connection opens. Announces identity.',
+    fields:[
+      { name:'type', val:'"handshake"', note:'message discriminator' },
+      { name:'did',  val:'string',      note:'sender DID' },
+      { name:'timestamp', val:'number', note:'epoch ms' },
+    ]
+  },
+  {
+    name:'Content Broadcast',
+    dir:'outbound',
+    dirLabel:'Sender → all peers',
+    desc:'Sent after a content item is published locally. Each peer verifies the ed25519 signature before accepting.',
+    fields:[
+      { name:'type',    val:'"content"',     note:'message discriminator' },
+      { name:'content', val:'SignedContent', note:'full signed payload' },
+    ]
+  },
+];
+
+// ─── CONTRACTS (raw highlighted code) ───────────────────────
+
+const CONTRACTS_HTML = `
+<div class="code-wrap">
+  <div class="code-label">types.ts <span class="copy-btn" onclick="copyCode(this)">⎘ copy</span></div>
+  <pre><span class="cmt">// ── Enums ──────────────────────────────────────────────</span>
+
+<span class="kw">type</span> <span class="tp">ContentType</span>  = <span class="str">'article'</span> | <span class="str">'tutorial'</span> | <span class="str">'video'</span>
+                    | <span class="str">'podcast'</span> | <span class="str">'course'</span> | <span class="str">'newsletter'</span><span class="op">;</span>
+
+<span class="kw">type</span> <span class="tp">Visibility</span>   = <span class="str">'public'</span> | <span class="str">'subscribers'</span> | <span class="str">'premium'</span> | <span class="str">'unlisted'</span><span class="op">;</span>
+
+<span class="kw">type</span> <span class="tp">LicenseType</span>  = <span class="str">'cc-by'</span> | <span class="str">'cc-by-sa'</span> | <span class="str">'cc-by-nc'</span>
+                    | <span class="str">'cc-by-nd'</span> | <span class="str">'commercial'</span> | <span class="str">'exclusive'</span> | <span class="str">'custom'</span><span class="op">;</span>
+
+<span class="kw">type</span> <span class="tp">CollabRole</span>   = <span class="str">'viewer'</span> | <span class="str">'editor'</span> | <span class="str">'admin'</span><span class="op">;</span>
+<span class="kw">type</span> <span class="tp">CollabStatus</span> = <span class="str">'pending'</span> | <span class="str">'accepted'</span> | <span class="str">'declined'</span><span class="op">;</span>
+
+<span class="cmt">// ── Embedded ─────────────────────────────────────────────</span>
+
+<span class="kw">interface</span> <span class="tp">License</span> <span class="op">{</span>
+  <span class="nm">type</span><span class="op">:</span>  <span class="tp">LicenseType</span><span class="op">;</span>
+  <span class="nm">price</span><span class="op">:</span> <span class="kw">number</span><span class="op">;</span>          <span class="cmt">// USD, 0 = free</span>
+<span class="op">}</span>
+
+<span class="cmt">// ── Core entities ───────────────────────────────────────────</span>
+
+<span class="kw">interface</span> <span class="tp">Content</span> <span class="op">{</span>
+  <span class="nm">id</span><span class="op">:</span>             <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">title</span><span class="op">:</span>          <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">body</span><span class="op">:</span>           <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">type</span><span class="op">:</span>           <span class="tp">ContentType</span><span class="op">;</span>
+  <span class="nm">visibility</span><span class="op">:</span>     <span class="tp">Visibility</span><span class="op">;</span>
+  <span class="nm">tags</span><span class="op">:</span>           <span class="kw">string</span><span class="op">[];</span>
+  <span class="nm">license</span><span class="op">:</span>        <span class="tp">License</span><span class="op">;</span>
+  <span class="nm">author</span><span class="op">:</span>         <span class="kw">string</span><span class="op">;</span>          <span class="cmt">// DID</span>
+  <span class="nm">created</span><span class="op">:</span>        <span class="kw">number</span><span class="op">;</span>          <span class="cmt">// epoch ms</span>
+  <span class="nm">views</span><span class="op">:</span>          <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">likes</span><span class="op">:</span>          <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">earnings</span><span class="op">:</span>       <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">status</span><span class="op">:</span>         <span class="str">'published'</span><span class="op">;</span>
+  <span class="nm">nft</span><span class="op">?:</span>           <span class="tp">NFT</span><span class="op">;</span>
+  <span class="nm">signature</span><span class="op">:</span>      <span class="kw">number</span><span class="op">[];</span>        <span class="cmt">// ed25519 sig bytes</span>
+  <span class="nm">canonicalHash</span><span class="op">:</span> <span class="kw">string</span><span class="op">;</span>          <span class="cmt">// sha-256 hex</span>
+<span class="op">}</span>
+
+<span class="kw">interface</span> <span class="tp">Draft</span> <span class="op">{</span>
+  <span class="nm">id</span><span class="op">:</span>      <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">title</span><span class="op">:</span>   <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">body</span><span class="op">:</span>    <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">type</span><span class="op">:</span>    <span class="tp">ContentType</span><span class="op">;</span>
+  <span class="nm">created</span><span class="op">:</span> <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">updated</span><span class="op">:</span> <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">status</span><span class="op">:</span>  <span class="str">'draft'</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">interface</span> <span class="tp">NFT</span> <span class="op">{</span>
+  <span class="nm">id</span><span class="op">:</span>          <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">contentId</span><span class="op">:</span>  <span class="kw">string</span><span class="op">;</span>          <span class="cmt">// FK → Content.id</span>
+  <span class="nm">title</span><span class="op">:</span>       <span class="kw">string</span><span class="op">;</span>          <span class="cmt">// denormalised</span>
+  <span class="nm">royalty</span><span class="op">:</span>    <span class="kw">number</span><span class="op">;</span>          <span class="cmt">// 0 – 50</span>
+  <span class="nm">edition</span><span class="op">:</span>    <span class="kw">number</span><span class="op">;</span>          <span class="cmt">// 0 = unlimited</span>
+  <span class="nm">minted</span><span class="op">:</span>     <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">contentHash</span><span class="op">:</span><span class="kw">string</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">interface</span> <span class="tp">Collaborator</span> <span class="op">{</span>
+  <span class="nm">id</span><span class="op">:</span>      <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">email</span><span class="op">:</span>   <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">role</span><span class="op">:</span>    <span class="tp">CollabRole</span><span class="op">;</span>
+  <span class="nm">invited</span><span class="op">:</span> <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">status</span><span class="op">:</span>  <span class="tp">CollabStatus</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">interface</span> <span class="tp">ScheduledPost</span> <span class="op">{</span>
+  <span class="nm">id</span><span class="op">:</span>           <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">contentId</span><span class="op">:</span>    <span class="kw">string</span><span class="op">;</span>          <span class="cmt">// FK → Draft.id</span>
+  <span class="nm">scheduledFor</span><span class="op">:</span> <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">created</span><span class="op">:</span>      <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">published</span><span class="op">?:</span>    <span class="kw">boolean</span><span class="op">;</span>        <span class="cmt">// true after auto-pub fires</span>
+<span class="op">}</span>
+
+<span class="kw">interface</span> <span class="tp">Stats</span> <span class="op">{</span>
+  <span class="nm">views</span><span class="op">:</span>        <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">subscribers</span><span class="op">:</span>  <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">earnings</span><span class="op">:</span>     <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">contentCount</span><span class="op">:</span><span class="kw">number</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="cmt">// ── Request payloads ─────────────────────────────────────────</span>
+
+<span class="kw">interface</span> <span class="tp">ContentPayload</span> <span class="op">{</span>
+  <span class="nm">title</span><span class="op">:</span>      <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">body</span><span class="op">:</span>       <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">type</span><span class="op">:</span>       <span class="tp">ContentType</span><span class="op">;</span>
+  <span class="nm">visibility</span><span class="op">:</span> <span class="tp">Visibility</span><span class="op">;</span>
+  <span class="nm">tags</span><span class="op">:</span>       <span class="kw">string</span><span class="op">[];</span>
+  <span class="nm">license</span><span class="op">:</span>    <span class="tp">License</span><span class="op">;</span>
+  <span class="nm">nft</span><span class="op">?:</span>        <span class="tp">NFTPayload</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">interface</span> <span class="tp">DraftPayload</span> <span class="op">{</span>
+  <span class="nm">title</span><span class="op">:</span> <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">body</span><span class="op">:</span>  <span class="kw">string</span><span class="op">;</span>
+  <span class="nm">type</span><span class="op">:</span>  <span class="tp">ContentType</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">interface</span> <span class="tp">NFTPayload</span> <span class="op">{</span>
+  <span class="nm">royalty</span><span class="op">:</span> <span class="kw">number</span><span class="op">;</span>   <span class="cmt">// 0 – 50</span>
+  <span class="nm">edition</span><span class="op">:</span> <span class="kw">number</span><span class="op">;</span>   <span class="cmt">// 0 = unlimited</span>
+<span class="op">}</span>
+
+<span class="kw">interface</span> <span class="tp">SchedulePayload</span> <span class="op">{</span>
+  <span class="nm">contentId</span><span class="op">:</span>    <span class="kw">string</span><span class="op">;</span>   <span class="cmt">// must reference a Draft</span>
+  <span class="nm">scheduledFor</span><span class="op">:</span> <span class="kw">number</span><span class="op">;</span>   <span class="cmt">// epoch ms, must be future</span>
+<span class="op">}</span>
+
+<span class="cmt">// ── Response shapes ──────────────────────────────────────────</span>
+
+<span class="kw">type</span> <span class="tp">SignedContent</span> = <span class="tp">Content</span> <span class="op">&amp;</span> <span class="op">{</span>
+  <span class="nm">signature</span><span class="op">:</span>      <span class="kw">number</span><span class="op">[];</span>
+  <span class="nm">canonicalHash</span><span class="op">:</span> <span class="kw">string</span><span class="op">;</span>
+<span class="op">};</span>
+
+<span class="kw">interface</span> <span class="tp">EarningsBreakdown</span> <span class="op">{</span>
+  <span class="nm">sales</span><span class="op">:</span>         <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">nftRoyalties</span><span class="op">:</span> <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">subscriptions</span><span class="op">:</span><span class="kw">number</span><span class="op">;</span>
+  <span class="nm">tips</span><span class="op">:</span>          <span class="kw">number</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">interface</span> <span class="tp">TimeSeriesData</span> <span class="op">{</span>
+  <span class="nm">labels</span><span class="op">:</span> <span class="kw">string</span><span class="op">[];</span>
+  <span class="nm">values</span><span class="op">:</span> <span class="kw">number</span><span class="op">[];</span>
+<span class="op">}</span>
+
+<span class="kw">interface</span> <span class="tp">AudienceInsights</span> <span class="op">{</span>
+  <span class="nm">avgReadTimeMs</span><span class="op">:</span>  <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">engagementPct</span><span class="op">:</span>  <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">retentionPct</span><span class="op">:</span>   <span class="kw">number</span><span class="op">;</span>
+  <span class="nm">sharePct</span><span class="op">:</span>       <span class="kw">number</span><span class="op">;</span>
+<span class="op">}</span>
+
+<span class="cmt">// ── P2P message frames ───────────────────────────────────────</span>
+
+<span class="kw">type</span> <span class="tp">PeerMessage</span> =
+  <span class="op">|</span> <span class="op">{</span> <span class="nm">type</span><span class="op">:</span> <span class="str">'handshake'</span><span class="op">;</span> <span class="nm">did</span><span class="op">:</span> <span class="kw">string</span><span class="op">;</span> <span class="nm">timestamp</span><span class="op">:</span> <span class="kw">number</span><span class="op">; }</span>
+  <span class="op">|</span> <span class="op">{</span> <span class="nm">type</span><span class="op">:</span> <span class="str">'content'</span><span class="op">;</span>  <span class="nm">content</span><span class="op">:</span> <span class="tp">SignedContent</span><span class="op">; }</span><span class="op">;</span></pre>
+</div>`;
+
+// ─── ER DIAGRAM (inline SVG) ─────────────────────────────────
+
+function buildER() {
+  // Hand-laid positions (px)
+  const W=140, H=22, pad=14;
+  const boxes = {
+    Identity:      { x:30,  y:30  },
+    Content:       { x:240, y:30  },
+    NFT:           { x:460, y:30  },
+    Draft:         { x:240, y:200 },
+    ScheduledPost: { x:460, y:200 },
+    Collaborator:  { x:30,  y:200 },
+    Stats:         { x:30,  y:370 },
+  };
+  const fields = {
+    Identity:      ['keyPair','did','pubkey','peerId'],
+    Content:       ['id','title','body','type','visibility','tags','license','author (DID)','nft?','signature'],
+    NFT:           ['id','contentId →','title','royalty','edition','minted','contentHash'],
+    Draft:         ['id','title','body','type','created','updated','status'],
+    ScheduledPost: ['id','contentId →','scheduledFor','created','published?'],
+    Collaborator:  ['id','email','role','invited','status'],
+    Stats:         ['views','subscribers','earnings','contentCount'],
+  };
+  const colors = {
+    Identity:'#c2462a', Content:'#1a6b5a', NFT:'#5b3d8a',
+    Draft:'#1a6b5a', ScheduledPost:'#b57a1e', Collaborator:'#3d4f5f', Stats:'#5b3d8a'
+  };
+
+  let svg = '';
+  const totalH = 490;
+  const totalW = 680;
+
+  // ── draw each box ──
+  Object.keys(boxes).forEach(name => {
+    const { x, y } = boxes[name];
+    const flds = fields[name];
+    const boxH = 24 + flds.length * 18;
+    const col = colors[name];
+
+    // shadow
+    svg += `<rect x="${x+2}" y="${y+2}" width="${W}" height="${boxH}" rx="6" fill="rgba(0,0,0,.07)"/>`;
+    // body
+    svg += `<rect x="${x}" y="${y}" width="${W}" height="${boxH}" rx="6" fill="#faf8f4" stroke="${col}" stroke-width="1.5"/>`;
+    // header
+    svg += `<rect x="${x}" y="${y}" width="${W}" height="24" rx="6" fill="${col}"/>`;
+    svg += `<rect x="${x}" y="${y+18}" width="${W}" height="6" fill="${col}"/>`;
+    // header text
+    svg += `<text x="${x+W/2}" y="${y+15}" text-anchor="middle" fill="#fff" font-family="Syne,sans-serif" font-weight="700" font-size="11">${name}</text>`;
+    // fields
+    flds.forEach((f, i) => {
+      const fy = y + 24 + i * 18;
+      const isFK = f.includes('→');
+      svg += `<text x="${x+8}" y="${fy+12}" fill="${isFK ? '#5b3d8a' : '#3d4f5f'}" font-family="IBM Plex Mono,monospace" font-size="10" font-weight="${isFK?'600':'400'}">${f}</text>`;
+    });
+  });
+
+  // ── draw relationships (lines) ──
+  // Identity ─── Content  (author)
+  svg += `<line x1="${30+W}" y1="${30+12}" x2="240" y2="${30+12}" stroke="#c2462a" stroke-width="1.8" stroke-dasharray="5,3"/>`;
+  svg += `<text x="${30+W+5}" y="${30+8}" fill="#c2462a" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600">N:1 author</text>`;
+
+  // Content ─── NFT  (1:0..1)
+  svg += `<line x1="${240+W}" y1="${30+36}" x2="460" y2="${30+36}" stroke="#5b3d8a" stroke-width="1.8"/>`;
+  svg += `<text x="${240+W+5}" y="${30+32}" fill="#5b3d8a" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600">1:0..1</text>`;
+
+  // Draft ─── ScheduledPost  (1:0..1)
+  svg += `<line x1="${240+W}" y1="${200+12}" x2="460" y2="${200+12}" stroke="#b57a1e" stroke-width="1.8"/>`;
+  svg += `<text x="${240+W+5}" y="${200+8}" fill="#b57a1e" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600">1:0..1</text>`;
+
+  // Draft ──→ Content (auto-publish promotion, dashed)
+  svg += `<line x1="${240+W/2}" y1="200" x2="${240+W/2}" y2="${30+120}" stroke="#1a6b5a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowTeal)"/>`;
+  svg += `<text x="${240+W/2+6}" y="150" fill="#1a6b5a" font-family="IBM Plex Mono,monospace" font-size="9" font-weight="600">auto-pub</text>`;
+
+  // Content ──→ Stats (aggregates, dashed)
+  svg += `<line x1="240" y1="${30+90}" x2="${30+W}" y2="${370+12}" stroke="#5b3d8a" stroke-width="1.2" stroke-dasharray="3,3"/>`;
+  svg += `<text x="105" y="310" fill="#5b3d8a" font-family="IBM Plex Mono,monospace" font-size="9">aggregates →</text>`;
+
+  // arrow marker
+  svg = `<defs>
+    <marker id="arrowTeal" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#1a6b5a"/>
+    </marker>
+  </defs>` + svg;
+
+  return `<svg viewBox="0 0 ${totalW} ${totalH}" width="100%" height="${totalH}" xmlns="http://www.w3.org/2000/svg" style="max-width:${totalW}px;">${svg}</svg>`;
+}
+
+// ─── LIFECYCLE FLOW ──────────────────────────────────────────
+
+function buildLifecycle() {
+  const steps = [
+    { label:'User writes content', cls:'start' },
+    { label:'Save Draft', cls:'mid' },
+    { label:'Schedule (date + time)', cls:'mid' },
+    { label:'60 s polling tick', cls:'mid' },
+    { label:'scheduledFor ≤ now?', cls:'mid' },
+    { label:'Promote Draft → Content', cls:'mid' },
+    { label:'Sign + broadcast to peers', cls:'end' },
+  ];
+  return `<div class="flow-row">` +
+    steps.map((s,i) =>
+      `<div class="flow-box ${s.cls}">${s.label}</div>` + (i < steps.length-1 ? `<span class="flow-arrow">→</span>` : '')
+    ).join('') +
+  `</div>`;
+}
+
+// ─── RENDERING ───────────────────────────────────────────────
+
+const PAGES = [
+  { id:'types',      label:'Types & Enums' },
+  { id:'contracts',  label:'Contracts' },
+  { id:'routes',     label:'Routes' },
+  { id:'storage',    label:'Storage' },
+  { id:'messages',   label:'P2P + Lifecycle' },
+  { id:'er',         label:'ER Diagram' },
+];
+
+// Nav pills
+(function buildNav() {
+  const nav = document.getElementById('nav');
+  PAGES.forEach((p, i) => {
+    const pill = document.createElement('button');
+    pill.className = 'pill' + (i === 0 ? ' active' : '');
+    pill.textContent = p.label;
+    pill.onclick = () => switchPage(p.id, pill);
+    nav.appendChild(pill);
+  });
+})();
+
+function switchPage(id, pill) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  pill.classList.add('active');
+}
+
+// ── Entity cards ──
+(function renderEntities() {
+  const grid = document.getElementById('entity-grid');
+  ENTITIES.forEach(ent => {
+    grid.innerHTML += `<div class="entity-card">
+      <div class="entity-card-head ${ent.color}">
+        <span class="ent-name">${ent.name}</span>
+        <span class="ent-badge ${ent.badge_cls}">${ent.badge}</span>
+      </div>` +
+      ent.fields.map(f => `<div class="field-row">
+        <span class="field-name">${f.name}<span class="${f.flags === 'pk' ? 'pk' : f.flags === 'fk' ? 'fk' : ''}">${f.flags === 'pk' ? 'PK' : f.flags === 'fk' ? 'FK' : ''}</span><span class="opt">${f.flags === 'opt' ? '?' : ''}</span></span>
+        <span class="field-type">${f.type}</span>
+        <span class="field-note">${f.note}</span>
+      </div>`).join('') +
+    `</div>`;
+  });
+})();
+
+// ── Enums ──
+(function renderEnums() {
+  const el = document.getElementById('enum-list');
+  ENUMS.forEach(e => {
+    el.innerHTML += `<div class="enum-row">
+      <span class="enum-name">${e.name}</span>
+      ${e.values.map(v => `<span class="enum-chip">${v}</span>`).join('')}
+    </div>`;
+  });
+})();
+
+// ── Contracts ──
+document.getElementById('contracts-code').innerHTML = CONTRACTS_HTML;
+
+// ── Routes ──
+(function renderRoutes() {
+  const el = document.getElementById('routes-content');
+  ROUTES.forEach(group => {
+    el.innerHTML += `<div class="route-group-label">${group.group}</div>
+    <table class="route-table"><thead><tr>
+      <th style="width:60px">Method</th><th style="width:200px">Path</th><th style="width:165px">Request</th><th style="width:165px">Response</th><th>Notes</th>
+    </tr></thead><tbody>` +
+    group.rows.map(r => `<tr>
+      <td><span class="verb ${r.verb.toLowerCase()}">${r.verb}</span></td>
+      <td class="route-path">${r.path.replace(/:(\w+)/g, '<span class="param">:$1</span>')}</td>
+      <td><code style="font-size:11.5px;">${r.req}</code></td>
+      <td><code style="font-size:11.5px;">${r.res}</code></td>
+      <td style="color:var(--mid);font-size:11.5px;">${r.note}</td>
+    </tr>`).join('') +
+    `</tbody></table>`;
+  });
+})();
+
+// ── Storage ──
+(function renderStorage() {
+  const el = document.getElementById('storage-table');
+  el.innerHTML = `<thead><tr>
+    <th style="width:195px">Key</th><th style="width:55px">Format</th><th style="width:150px">Shape</th><th>Notes</th>
+  </tr></thead><tbody>` +
+  STORAGE.map(s => `<tr>
+    <td><span class="storage-key">${s.key}</span></td>
+    <td><span class="storage-type-tag ${s.type.toLowerCase()}">${s.type}</span></td>
+    <td><code style="font-size:11.5px;">${s.shape}</code></td>
+    <td style="font-size:11.5px;color:var(--mid);">${s.note}</td>
+  </tr>`).join('') +
+  `</tbody></table>`;
+})();
+
+// ── Messages ──
+(function renderMessages() {
+  const el = document.getElementById('messages-content');
+  WS_FRAMES.forEach(f => {
+    el.innerHTML += `<div class="ws-frame">
+      <div class="ws-frame-head">
+        <span class="ws-dir ${f.dir}">${f.dirLabel}</span>
+        <strong>${f.name}</strong>
+      </div>
+      <p style="font-size:12px;color:var(--mid);margin-bottom:.4rem;">${f.desc}</p>` +
+      f.fields.map(fd => `<div style="display:flex;gap:.7rem;padding:.2rem 0;font-size:12px;">
+        <span style="font-weight:700;min-width:80px;color:var(--ink);">${fd.name}</span>
+        <span style="color:var(--teal);font-weight:500;">${fd.val}</span>
+        <span style="color:var(--mid);margin-left:auto;">${fd.note}</span>
+      </div>`).join('') +
+    `</div>`;
+  });
+})();
+
+// ── Lifecycle ──
+document.getElementById('lifecycle-content').innerHTML = buildLifecycle();
+
+// ── ER ──
+document.getElementById('er-container').innerHTML = buildER();
+
+// ── Copy helper ──
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = '✓ copied';
+    setTimeout(() => btn.textContent = '⎘ copy', 1200);
+  });
+}
+</script>
+</body>
+</html>

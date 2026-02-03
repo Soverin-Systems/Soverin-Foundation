@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Social</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --bg-hover: #30363d;
+            --border: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #bc8cff;
+            --accent-orange: #ff9a56;
+            --accent-red: #f85149;
+        }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .nav-item.active {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Create Post */
+        .create-post {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .post-input-container {
+            display: flex;
+            gap: 1rem;
+        }
+
+        textarea {
+            flex: 1;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--text-primary);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        .post-tools {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .tool-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-blue);
+        }
+
+        button {
+            background: var(--accent-blue);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+        }
+
+        button.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* Feed */
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .post-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+
+        .post-card:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .post-header {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .post-meta {
+            flex: 1;
+        }
+
+        .post-author {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .post-author:hover {
+            color: var(--accent-blue);
+            cursor: pointer;
+        }
+
+        .post-time {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .post-content {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .post-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .post-interactions {
+            display: flex;
+            gap: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .interaction-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .interaction-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+        }
+
+        .interaction-btn.active {
+            color: var(--accent-red);
+        }
+
+        .interaction-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Comments */
+        .comments-section {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .comment {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .comment .user-avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 0.9rem;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .comment-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Right Sidebar */
+        .right-sidebar {
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            padding: 1.5rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            padding-left: 2.5rem;
+            color: var(--text-primary);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: var(--text-secondary);
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .suggestion-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-card:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .suggestion-info {
+            flex: 1;
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .suggestion-handle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .follow-btn {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .follow-btn.following {
+            background: var(--accent-blue);
+            color: var(--bg-primary);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .identity-display {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            margin-top: 0.5rem;
+        }
+
+        .profile-header {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-info {
+            display: flex;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-handle {
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .profile-bio {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat {
+            cursor: pointer;
+        }
+
+        .stat:hover {
+            color: var(--accent-blue);
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            color: var(--accent-blue);
+        }
+
+        .tab.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        @media (max-width: 1200px) {
+            .app-container {
+                grid-template-columns: 280px 1fr;
+            }
+            .right-sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                display: none;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">Sovereign</div>
+            
+            <nav>
+                <div class="nav-item active" onclick="navigate('home')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Home
+                </div>
+                
+                <div class="nav-item" onclick="navigate('explore')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                    </svg>
+                    Explore
+                </div>
+                
+                <div class="nav-item" onclick="navigate('notifications')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>
+                    Notifications
+                </div>
+                
+                <div class="nav-item" onclick="navigate('messages')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    Messages
+                </div>
+                
+                <div class="nav-item" onclick="navigate('profile')">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Profile
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Content will be rendered here -->
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <div class="search-box">
+                <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" placeholder="Search..." id="searchInput" oninput="performSearch(this.value)">
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">Suggested For You</h3>
+                <div id="suggestions"></div>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">Trending Tags</h3>
+                <div id="trendingTags"></div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Sign In</h2>
+                <button class="close-btn" onclick="closeModal('loginModal')">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Identity Address or Alias</label>
+                <input type="text" id="loginAddress" placeholder="0x... or username">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Or Create New Identity</label>
+                <button onclick="createIdentity()" class="secondary" style="width: 100%;">Generate New Identity</button>
+            </div>
+            
+            <button onclick="login()" style="width: 100%;">Sign In</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="identityModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">New Identity Created</h2>
+                <button class="close-btn" onclick="closeModal('identityModal')">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Your Identity Address</label>
+                <div class="identity-display" id="newIdentityAddress"></div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Choose an Alias</label>
+                <input type="text" id="newIdentityAlias" placeholder="username">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Display Name</label>
+                <input type="text" id="newIdentityName" placeholder="Your Name">
+            </div>
+            
+            <button onclick="saveNewIdentity()" style="width: 100%;">Save Identity</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // CRYPTO & IDENTITY MANAGEMENT
+        // ============================================================================
+        
+        class CryptoService {
+            async generateKeypair() {
+                const keypair = await crypto.subtle.generateKey(
+                    { name: 'ECDSA', namedCurve: 'P-256' },
+                    true,
+                    ['sign', 'verify']
+                );
+                return keypair;
+            }
+
+            async exportPublicKey(publicKey) {
+                const exported = await crypto.subtle.exportKey('spki', publicKey);
+                return this.arrayBufferToBase64(exported);
+            }
+
+            async exportPrivateKey(privateKey) {
+                const exported = await crypto.subtle.exportKey('pkcs8', privateKey);
+                return this.arrayBufferToBase64(exported);
+            }
+
+            async importPublicKey(base64Key) {
+                const buffer = this.base64ToArrayBuffer(base64Key);
+                return await crypto.subtle.importKey(
+                    'spki',
+                    buffer,
+                    { name: 'ECDSA', namedCurve: 'P-256' },
+                    true,
+                    ['verify']
+                );
+            }
+
+            async importPrivateKey(base64Key) {
+                const buffer = this.base64ToArrayBuffer(base64Key);
+                return await crypto.subtle.importKey(
+                    'pkcs8',
+                    buffer,
+                    { name: 'ECDSA', namedCurve: 'P-256' },
+                    true,
+                    ['sign']
+                );
+            }
+
+            async sign(privateKey, data) {
+                const encoder = new TextEncoder();
+                const dataBuffer = encoder.encode(JSON.stringify(data));
+                const signature = await crypto.subtle.sign(
+                    { name: 'ECDSA', hash: 'SHA-256' },
+                    privateKey,
+                    dataBuffer
+                );
+                return this.arrayBufferToBase64(signature);
+            }
+
+            async verify(publicKey, signature, data) {
+                const encoder = new TextEncoder();
+                const dataBuffer = encoder.encode(JSON.stringify(data));
+                const sigBuffer = this.base64ToArrayBuffer(signature);
+                return await crypto.subtle.verify(
+                    { name: 'ECDSA', hash: 'SHA-256' },
+                    publicKey,
+                    sigBuffer,
+                    dataBuffer
+                );
+            }
+
+            generateAddress() {
+                const bytes = new Uint8Array(20);
+                crypto.getRandomValues(bytes);
+                return '0x' + Array.from(bytes)
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('');
+            }
+
+            generateCID(data) {
+                // Simplified CID generation
+                const hash = JSON.stringify(data)
+                    .split('')
+                    .reduce((acc, char) => ((acc << 5) - acc) + char.charCodeAt(0), 0);
+                return 'Qm' + Math.abs(hash).toString(36).padStart(44, '0').substring(0, 44);
+            }
+
+            arrayBufferToBase64(buffer) {
+                const bytes = new Uint8Array(buffer);
+                let binary = '';
+                for (let i = 0; i < bytes.length; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return btoa(binary);
+            }
+
+            base64ToArrayBuffer(base64) {
+                const binary = atob(base64);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return bytes.buffer;
+            }
+        }
+
+        // ============================================================================
+        // STORAGE SERVICE
+        // ============================================================================
+        
+        class StorageService {
+            constructor() {
+                this.prefix = 'sovereign_';
+            }
+
+            save(key, value) {
+                localStorage.setItem(this.prefix + key, JSON.stringify(value));
+            }
+
+            load(key) {
+                const data = localStorage.getItem(this.prefix + key);
+                return data ? JSON.parse(data) : null;
+            }
+
+            remove(key) {
+                localStorage.removeItem(this.prefix + key);
+            }
+
+            saveIdentity(identity) {
+                const identities = this.load('identities') || {};
+                identities[identity.id] = identity;
+                this.save('identities', identities);
+            }
+
+            getIdentity(id) {
+                const identities = this.load('identities') || {};
+                return identities[id];
+            }
+
+            getAllIdentities() {
+                return this.load('identities') || {};
+            }
+
+            savePost(post) {
+                const posts = this.load('posts') || [];
+                posts.unshift(post);
+                this.save('posts', posts);
+            }
+
+            getAllPosts() {
+                return this.load('posts') || [];
+            }
+
+            updatePost(cid, updates) {
+                const posts = this.load('posts') || [];
+                const index = posts.findIndex(p => p.cid === cid);
+                if (index !== -1) {
+                    posts[index] = { ...posts[index], ...updates };
+                    this.save('posts', posts);
+                }
+            }
+        }
+
+        // ============================================================================
+        // APPLICATION STATE
+        // ============================================================================
+        
+        class App {
+            constructor() {
+                this.crypto = new CryptoService();
+                this.storage = new StorageService();
+                this.currentUser = null;
+                this.currentView = 'home';
+                this.newIdentityData = null;
+                
+                this.init();
+            }
+
+            init() {
+                // Check for existing session
+                const sessionId = this.storage.load('currentSession');
+                if (sessionId) {
+                    this.currentUser = this.storage.getIdentity(sessionId);
+                }
+
+                if (!this.currentUser) {
+                    this.showLoginModal();
+                } else {
+                    this.renderHome();
+                }
+
+                // Initialize with demo data if empty
+                this.ensureDemoData();
+            }
+
+            ensureDemoData() {
+                const identities = this.storage.getAllIdentities();
+                if (Object.keys(identities).length === 0) {
+                    this.createDemoData();
+                }
+            }
+
+            async createDemoData() {
+                const demoUsers = [
+                    { alias: 'alice', name: 'Alice Researcher', bio: 'Exploring decentralized systems' },
+                    { alias: 'bob', name: 'Bob Developer', bio: 'Building the future of Web3' },
+                    { alias: 'charlie', name: 'Charlie Coder', bio: 'Quantum computing enthusiast' }
+                ];
+
+                for (const user of demoUsers) {
+                    const keypair = await this.crypto.generateKeypair();
+                    const publicKey = await this.crypto.exportPublicKey(keypair.publicKey);
+                    const privateKey = await this.crypto.exportPrivateKey(keypair.privateKey);
+                    
+                    const identity = {
+                        id: 'did:sovereign:' + this.crypto.generateAddress(),
+                        address: this.crypto.generateAddress(),
+                        publicKey: publicKey,
+                        privateKey: privateKey,
+                        aliases: [user.alias],
+                        capabilities: {
+                            canSign: true,
+                            canHost: true,
+                            canPublish: true,
+                            canDelegate: false
+                        },
+                        preferences: {
+                            defaultNamespace: 'posts',
+                            displayName: user.name,
+                            bio: user.bio,
+                            theme: 'dark'
+                        },
+                        social: {
+                            followers: [],
+                            following: [],
+                            blocked: []
+                        },
+                        namespaces: {
+                            posts: [],
+                            videos: [],
+                            messages: [],
+                            files: [],
+                            workflows: [],
+                            events: [],
+                            storage: []
+                        }
+                    };
+
+                    this.storage.saveIdentity(identity);
+                }
+
+                // Create demo posts
+                const demoPosts = [
+                    {
+                        author: 'alice',
+                        title: 'Decentralized Identity Systems',
+                        content: 'Exploring the fundamental principles of decentralized identity systems and their role in sovereign computing.',
+                        tags: ['identity', 'blockchain', 'privacy']
+                    },
+                    {
+                        author: 'bob',
+                        title: 'Building Hybrid Search Engines',
+                        content: 'Combining BM25 sparse retrieval with dense semantic search. Hybrid approaches leverage the strengths of both methods.',
+                        tags: ['search', 'ai', 'information-retrieval']
+                    },
+                    {
+                        author: 'charlie',
+                        title: 'Quantum-Resistant Cryptography',
+                        content: 'Preparing for the post-quantum era with lattice-based cryptographic schemes.',
+                        tags: ['quantum', 'cryptography', 'security']
+                    }
+                ];
+
+                const identitiesObj = this.storage.getAllIdentities();
+                const identitiesArray = Object.values(identitiesObj);
+
+                for (const postData of demoPosts) {
+                    const author = identitiesArray.find(i => i.aliases.includes(postData.author));
+                    if (author) {
+                        const post = {
+                            cid: this.crypto.generateCID({ ...postData, timestamp: Date.now() }),
+                            type: 'post',
+                            createdAt: Date.now() - Math.random() * 86400000,
+                            author: author.id,
+                            metadata: {
+                                title: postData.title,
+                                description: postData.content,
+                                tags: postData.tags
+                            },
+                            content: postData.content,
+                            interactions: {
+                                likes: Math.floor(Math.random() * 50),
+                                comments: [],
+                                shares: Math.floor(Math.random() * 10)
+                            }
+                        };
+
+                        this.storage.savePost(post);
+                    }
+                }
+            }
+
+            showLoginModal() {
+                document.getElementById('loginModal').classList.add('active');
+            }
+
+            hideLoginModal() {
+                document.getElementById('loginModal').classList.remove('active');
+            }
+
+            async createIdentity() {
+                const keypair = await this.crypto.generateKeypair();
+                const publicKey = await this.crypto.exportPublicKey(keypair.publicKey);
+                const privateKey = await this.crypto.exportPrivateKey(keypair.privateKey);
+                const address = this.crypto.generateAddress();
+
+                this.newIdentityData = {
+                    keypair,
+                    publicKey,
+                    privateKey,
+                    address,
+                    id: 'did:sovereign:' + address
+                };
+
+                document.getElementById('newIdentityAddress').textContent = this.newIdentityData.id;
+                this.hideLoginModal();
+                document.getElementById('identityModal').classList.add('active');
+            }
+
+            saveNewIdentity() {
+                const alias = document.getElementById('newIdentityAlias').value.trim();
+                const displayName = document.getElementById('newIdentityName').value.trim();
+
+                if (!alias || !displayName) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                const identity = {
+                    id: this.newIdentityData.id,
+                    address: this.newIdentityData.address,
+                    publicKey: this.newIdentityData.publicKey,
+                    privateKey: this.newIdentityData.privateKey,
+                    aliases: [alias],
+                    capabilities: {
+                        canSign: true,
+                        canHost: true,
+                        canPublish: true,
+                        canDelegate: false
+                    },
+                    preferences: {
+                        defaultNamespace: 'posts',
+                        displayName: displayName,
+                        bio: '',
+                        theme: 'dark'
+                    },
+                    social: {
+                        followers: [],
+                        following: [],
+                        blocked: []
+                    },
+                    namespaces: {
+                        posts: [],
+                        videos: [],
+                        messages: [],
+                        files: [],
+                        workflows: [],
+                        events: [],
+                        storage: []
+                    }
+                };
+
+                this.storage.saveIdentity(identity);
+                this.currentUser = identity;
+                this.storage.save('currentSession', identity.id);
+
+                document.getElementById('identityModal').classList.remove('active');
+                this.renderHome();
+            }
+
+            login() {
+                const address = document.getElementById('loginAddress').value.trim();
+                
+                if (!address) {
+                    alert('Please enter an address or alias');
+                    return;
+                }
+
+                const identities = this.storage.getAllIdentities();
+                let identity = null;
+
+                // Try exact ID match
+                if (identities[address]) {
+                    identity = identities[address];
+                } else {
+                    // Try alias match
+                    identity = Object.values(identities).find(i => 
+                        i.aliases.includes(address.toLowerCase())
+                    );
+                }
+
+                if (!identity) {
+                    alert('Identity not found. Please create a new one.');
+                    return;
+                }
+
+                this.currentUser = identity;
+                this.storage.save('currentSession', identity.id);
+                this.hideLoginModal();
+                this.renderHome();
+            }
+
+            async createPost(content, tags = []) {
+                if (!this.currentUser) return;
+
+                const privateKey = await this.crypto.importPrivateKey(this.currentUser.privateKey);
+                
+                const postData = {
+                    content,
+                    tags,
+                    author: this.currentUser.id,
+                    timestamp: Date.now()
+                };
+
+                const signature = await this.crypto.sign(privateKey, postData);
+
+                const post = {
+                    cid: this.crypto.generateCID(postData),
+                    type: 'post',
+                    createdAt: Date.now(),
+                    author: this.currentUser.id,
+                    metadata: {
+                        description: content,
+                        tags: tags
+                    },
+                    content: content,
+                    signature: signature,
+                    interactions: {
+                        likes: 0,
+                        comments: [],
+                        shares: 0
+                    }
+                };
+
+                this.storage.savePost(post);
+                this.renderHome();
+            }
+
+            toggleLike(cid) {
+                if (!this.currentUser) return;
+
+                const posts = this.storage.getAllPosts();
+                const post = posts.find(p => p.cid === cid);
+                
+                if (post) {
+                    if (!post.likedBy) post.likedBy = [];
+                    
+                    const index = post.likedBy.indexOf(this.currentUser.id);
+                    if (index === -1) {
+                        post.likedBy.push(this.currentUser.id);
+                        post.interactions.likes++;
+                    } else {
+                        post.likedBy.splice(index, 1);
+                        post.interactions.likes--;
+                    }
+
+                    this.storage.updatePost(cid, post);
+                    this.renderView(this.currentView);
+                }
+            }
+
+            async addComment(cid, content) {
+                if (!this.currentUser || !content.trim()) return;
+
+                const posts = this.storage.getAllPosts();
+                const post = posts.find(p => p.cid === cid);
+                
+                if (post) {
+                    const comment = {
+                        cid: this.crypto.generateCID({ content, timestamp: Date.now() }),
+                        author: this.currentUser.id,
+                        createdAt: Date.now(),
+                        content: content,
+                        likes: 0
+                    };
+
+                    post.interactions.comments.push(comment);
+                    this.storage.updatePost(cid, post);
+                    this.renderView(this.currentView);
+                }
+            }
+
+            follow(targetId) {
+                if (!this.currentUser || targetId === this.currentUser.id) return;
+
+                const index = this.currentUser.social.following.indexOf(targetId);
+                if (index === -1) {
+                    this.currentUser.social.following.push(targetId);
+                    
+                    const target = this.storage.getIdentity(targetId);
+                    if (target) {
+                        target.social.followers.push(this.currentUser.id);
+                        this.storage.saveIdentity(target);
+                    }
+                } else {
+                    this.currentUser.social.following.splice(index, 1);
+                    
+                    const target = this.storage.getIdentity(targetId);
+                    if (target) {
+                        const followerIndex = target.social.followers.indexOf(this.currentUser.id);
+                        if (followerIndex !== -1) {
+                            target.social.followers.splice(followerIndex, 1);
+                            this.storage.saveIdentity(target);
+                        }
+                    }
+                }
+
+                this.storage.saveIdentity(this.currentUser);
+                this.renderSuggestions();
+            }
+
+            // Rendering methods
+            renderHome() {
+                this.currentView = 'home';
+                const posts = this.storage.getAllPosts();
+                const identities = this.storage.getAllIdentities();
+
+                const content = `
+                    <div class="header">
+                        <h1>Home</h1>
+                    </div>
+
+                    <div class="create-post">
+                        <div class="post-input-container">
+                            <div class="user-avatar">${this.getInitials(this.currentUser.preferences.displayName)}</div>
+                            <textarea id="postContent" placeholder="What's on your mind?"></textarea>
+                        </div>
+                        <div class="post-actions">
+                            <div class="post-tools">
+                                <input type="text" id="postTags" placeholder="Tags (comma separated)" style="padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-primary);">
+                            </div>
+                            <button onclick="app.submitPost()">Post</button>
+                        </div>
+                    </div>
+
+                    <div class="feed">
+                        ${posts.map(post => this.renderPost(post, identities)).join('')}
+                    </div>
+                `;
+
+                document.getElementById('mainContent').innerHTML = content;
+                this.renderSuggestions();
+                this.renderTrendingTags();
+            }
+
+            renderPost(post, identities) {
+                const author = identities[post.author];
+                if (!author) return '';
+
+                const isLiked = post.likedBy && post.likedBy.includes(this.currentUser.id);
+                const showComments = post.interactions.comments.length > 0;
+
+                return `
+                    <div class="post-card">
+                        <div class="post-header">
+                            <div class="user-avatar">${this.getInitials(author.preferences.displayName)}</div>
+                            <div class="post-meta">
+                                <div class="post-author" onclick="app.viewProfile('${author.id}')">
+                                    ${author.preferences.displayName}
+                                </div>
+                                <div class="post-time">
+                                    @${author.aliases[0]} • ${this.formatTime(post.createdAt)}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="post-content">${post.content}</div>
+
+                        ${post.metadata.tags ? `
+                            <div class="post-tags">
+                                ${post.metadata.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+                            </div>
+                        ` : ''}
+
+                        <div class="post-interactions">
+                            <button class="interaction-btn ${isLiked ? 'active' : ''}" onclick="app.toggleLike('${post.cid}')">
+                                <svg fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                                ${post.interactions.likes}
+                            </button>
+
+                            <button class="interaction-btn" onclick="app.toggleComments('${post.cid}')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                                ${post.interactions.comments.length}
+                            </button>
+
+                            <button class="interaction-btn">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                                </svg>
+                                ${post.interactions.shares}
+                            </button>
+                        </div>
+
+                        <div class="comments-section" id="comments-${post.cid}" style="display: none;">
+                            ${post.interactions.comments.map(comment => this.renderComment(comment, identities)).join('')}
+                            
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                <input type="text" id="comment-input-${post.cid}" placeholder="Write a comment..." style="flex: 1; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-primary);">
+                                <button onclick="app.submitComment('${post.cid}')">Comment</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderComment(comment, identities) {
+                const author = identities[comment.author];
+                if (!author) return '';
+
+                return `
+                    <div class="comment">
+                        <div class="user-avatar">${this.getInitials(author.preferences.displayName)}</div>
+                        <div class="comment-content">
+                            <div class="comment-author">${author.preferences.displayName}</div>
+                            <div class="comment-text">${comment.content}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderProfile(identityId = null) {
+                this.currentView = 'profile';
+                const targetId = identityId || this.currentUser.id;
+                const identity = this.storage.getIdentity(targetId);
+                const isOwnProfile = targetId === this.currentUser.id;
+                const isFollowing = this.currentUser.social.following.includes(targetId);
+
+                const posts = this.storage.getAllPosts().filter(p => p.author === targetId);
+                const identities = this.storage.getAllIdentities();
+
+                const content = `
+                    <div class="profile-header">
+                        <div class="profile-info">
+                            <div class="profile-avatar">${this.getInitials(identity.preferences.displayName)}</div>
+                            <div class="profile-details">
+                                <div class="profile-name">${identity.preferences.displayName}</div>
+                                <div class="profile-handle">@${identity.aliases[0]}</div>
+                                <div class="profile-bio">${identity.preferences.bio || 'No bio yet'}</div>
+                                <div class="profile-stats">
+                                    <div class="stat">
+                                        <div class="stat-value">${posts.length}</div>
+                                        <div class="stat-label">Posts</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-value">${identity.social.followers.length}</div>
+                                        <div class="stat-label">Followers</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-value">${identity.social.following.length}</div>
+                                        <div class="stat-label">Following</div>
+                                    </div>
+                                </div>
+                                ${!isOwnProfile ? `
+                                    <button onclick="app.follow('${targetId}')" class="follow-btn ${isFollowing ? 'following' : ''}" style="margin-top: 1rem;">
+                                        ${isFollowing ? 'Following' : 'Follow'}
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tabs">
+                        <div class="tab active">Posts</div>
+                        <div class="tab">Media</div>
+                        <div class="tab">Likes</div>
+                    </div>
+
+                    <div class="feed">
+                        ${posts.map(post => this.renderPost(post, identities)).join('')}
+                        ${posts.length === 0 ? '<div class="empty-state">No posts yet</div>' : ''}
+                    </div>
+                `;
+
+                document.getElementById('mainContent').innerHTML = content;
+            }
+
+            renderSuggestions() {
+                const identities = Object.values(this.storage.getAllIdentities())
+                    .filter(i => i.id !== this.currentUser.id)
+                    .slice(0, 3);
+
+                const html = identities.map(identity => {
+                    const isFollowing = this.currentUser.social.following.includes(identity.id);
+                    return `
+                        <div class="suggestion-card">
+                            <div class="user-avatar">${this.getInitials(identity.preferences.displayName)}</div>
+                            <div class="suggestion-info">
+                                <div class="suggestion-name">${identity.preferences.displayName}</div>
+                                <div class="suggestion-handle">@${identity.aliases[0]}</div>
+                            </div>
+                            <button class="follow-btn ${isFollowing ? 'following' : ''}" onclick="app.follow('${identity.id}')">
+                                ${isFollowing ? '✓' : '+'}
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('suggestions').innerHTML = html;
+            }
+
+            renderTrendingTags() {
+                const posts = this.storage.getAllPosts();
+                const tagCounts = {};
+
+                posts.forEach(post => {
+                    if (post.metadata.tags) {
+                        post.metadata.tags.forEach(tag => {
+                            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                        });
+                    }
+                });
+
+                const trending = Object.entries(tagCounts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                const html = trending.map(([tag, count]) => `
+                    <div class="tag" style="margin-bottom: 0.5rem; cursor: pointer;">
+                        #${tag} <span style="color: var(--text-secondary);">(${count})</span>
+                    </div>
+                `).join('');
+
+                document.getElementById('trendingTags').innerHTML = html || '<div style="color: var(--text-secondary); font-size: 0.85rem;">No trending tags yet</div>';
+            }
+
+            // Helper methods
+            getInitials(name) {
+                return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            }
+
+            formatTime(timestamp) {
+                const diff = Date.now() - timestamp;
+                const minutes = Math.floor(diff / 60000);
+                const hours = Math.floor(diff / 3600000);
+                const days = Math.floor(diff / 86400000);
+
+                if (minutes < 60) return `${minutes}m`;
+                if (hours < 24) return `${hours}h`;
+                return `${days}d`;
+            }
+
+            submitPost() {
+                const content = document.getElementById('postContent').value.trim();
+                const tagsInput = document.getElementById('postTags').value.trim();
+                const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()) : [];
+
+                if (!content) return;
+
+                this.createPost(content, tags);
+                document.getElementById('postContent').value = '';
+                document.getElementById('postTags').value = '';
+            }
+
+            submitComment(cid) {
+                const input = document.getElementById(`comment-input-${cid}`);
+                const content = input.value.trim();
+                
+                if (content) {
+                    this.addComment(cid, content);
+                    input.value = '';
+                }
+            }
+
+            toggleComments(cid) {
+                const commentsSection = document.getElementById(`comments-${cid}`);
+                commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+            }
+
+            viewProfile(identityId) {
+                this.renderProfile(identityId);
+            }
+
+            renderView(view) {
+                switch (view) {
+                    case 'home':
+                        this.renderHome();
+                        break;
+                    case 'profile':
+                        this.renderProfile();
+                        break;
+                    default:
+                        this.renderHome();
+                }
+            }
+        }
+
+        // ============================================================================
+        // GLOBAL FUNCTIONS
+        // ============================================================================
+        
+        let app;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            app = new App();
+        });
+
+        function navigate(view) {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+
+            switch (view) {
+                case 'home':
+                    app.renderHome();
+                    break;
+                case 'profile':
+                    app.renderProfile();
+                    break;
+                case 'notifications':
+                case 'messages':
+                case 'explore':
+                    document.getElementById('mainContent').innerHTML = `
+                        <div class="empty-state">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                            </svg>
+                            <p>Coming Soon</p>
+                        </div>
+                    `;
+                    break;
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function createIdentity() {
+            app.createIdentity();
+        }
+
+        function saveNewIdentity() {
+            app.saveNewIdentity();
+        }
+
+        function login() {
+            app.login();
+        }
+
+        function performSearch(query) {
+            // Search functionality placeholder
+            console.log('Searching for:', query);
+        }
+    </script>
+</body>
+</html>
